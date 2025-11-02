@@ -2,4 +2,15 @@
 
 @theme {
   --font-display: "Paquito-Variable";
+  --default-font-family: "Chillax-Regular";
+}
+
+h1 {
+  @apply font-display;
+  @apply tracking-wide;
+  @apply text-3xl;
+}
+
+* {
+  @apply tracking-tight;
 }
