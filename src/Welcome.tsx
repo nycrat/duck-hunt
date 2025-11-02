@@ -1,3 +1,4 @@
+import { Title } from "@solidjs/meta"
 import { createSignal } from "solid-js"
 
 const Welcome = () => {
@@ -5,6 +6,7 @@ const Welcome = () => {
 
   return (
     <main class="h-screen flex justify-center items-center text-center">
+      <Title>Welcome | DuckHunt</Title>
       <form
         class="flex flex-col gap-1 items-center"
         onSubmit={(e) => {
