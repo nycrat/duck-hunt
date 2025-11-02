@@ -6,7 +6,7 @@ import "./paquito.css"
 import "./chillax.css"
 import "./index.css"
 import { Route, Router } from "@solidjs/router"
-import App from "./App"
+import Welcome from "./Welcome"
 import NotFound from "./NotFound"
 
 const root = document.getElementById("root")
@@ -20,7 +20,7 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 render(
   () => (
     <Router>
-      <Route path="/" component={App} />
+      <Route path="/" component={Welcome} />
       <Route path="*" component={NotFound} />
     </Router>
   ),
