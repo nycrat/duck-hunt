@@ -2,6 +2,7 @@
 import { render } from "solid-js/web"
 import "solid-devtools"
 
+import "./paquito.css"
 import "./index.css"
 import { Route, Router } from "@solidjs/router"
 import App from "./App"
