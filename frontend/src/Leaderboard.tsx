@@ -1,16 +1,19 @@
 import { Title } from "@solidjs/meta"
 import { A } from "@solidjs/router"
+import { createResource, Match, Show, Switch } from "solid-js"
+
+interface Participant {
+  name: string,
+  score: number
+}
+
+const fetchParticipants = async (): Promise<Participant[]> => {
+  const response = await fetch("http://localhost:8000/")
+  return response.json()
+}
 
 const Leaderboard = () => {
-  const participants = [
-    { name: "Kel", score: 1600 },
-    { name: "Aly", score: 1000 },
-    { name: "Ado", score: 1800 },
-    { name: "Kiy", score: 1200 },
-    { name: "Bec", score: 1300 },
-    { name: "Kie", score: 2600 },
-    { name: "Luc", score: 900 },
-  ]
+  const [participants] = createResource(fetchParticipants);
 
   return (
     <main class="h-screen p-10 flex flex-col gap-1">
@@ -18,15 +21,26 @@ const Leaderboard = () => {
 
       <h1>Leaderboard</h1>
 
-      <div>
-        <ol class="list-decimal list-inside">
-          {participants
-            .toSorted((a, b) => b.score - a.score)
-            .map((participant) => (
-              <li>{`${participant.name} (${participant.score}pts)`}</li>
-            ))}
-        </ol>
-      </div>
+      <Show when={participants.loading}>
+        loading...
+      </Show>
+
+      <Switch>
+        <Match when={participants.error}>
+          Error: {participants.error}
+        </Match>
+        <Match when={participants()}>
+          <div>
+            <ol class="list-decimal list-inside">
+              {participants()!
+                .toSorted((a, b) => b.score - a.score)
+                .map((participant) => (
+                  <li>{`${participant.name} (${participant.score}pts)`}</li>
+                ))}
+            </ol>
+          </div>
+        </Match>
+      </Switch>
 
       <div class="grow" />
 
