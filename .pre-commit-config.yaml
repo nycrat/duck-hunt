@@ -4,4 +4,4 @@ repos:
       - id: format
         name: format
         language: system
-        entry: npm run format
+        entry: bash -c "cd frontend && npm run format"
