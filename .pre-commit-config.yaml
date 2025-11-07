@@ -1,7 +1,15 @@
 repos:
   - repo: local
     hooks:
-      - id: format
-        name: format
+      - id: format frontend
+        name: format frontend
         language: system
         entry: bash -c "cd frontend && npm run format"
+
+repos:
+  - repo: local
+    hooks:
+      - id: format backend
+        name: format backend
+        language: system
+        entry: bash -c "cd backend && go fmt"
