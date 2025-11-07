@@ -1,13 +1,18 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	_ "github.com/lib/pq"
 )
 
 type participant struct {
@@ -16,15 +21,37 @@ type participant struct {
 }
 
 func main() {
-	participants := []participant{
-		{Name: "Kel", Score: 1600},
-		{Name: "Aly", Score: 1000},
-		{Name: "Ado", Score: 1800},
-		{Name: "Kiy", Score: 1200},
-		{Name: "Bec", Score: 1300},
-		{Name: "Kie", Score: 2600},
-		{Name: "Luc", Score: 900},
+	if len(os.Args) < 3 {
+		os.Exit(1)
 	}
+	// jwtSecret := os.Args[1]
+	dbConnStr := os.Args[2]
+	db, err := sql.Open("postgres", dbConnStr)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rows, err := db.Query("SELECT name, score FROM participants")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	participants := []participant{}
+
+	for rows.Next() {
+		var name string
+		var score int
+		err := rows.Scan(&name, &score)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		name = strings.TrimSpace(name)
+		participants = append(participants, participant{Name: name, Score: score})
+	}
+
 	serialized, _ := json.Marshal(participants)
 
 	r := chi.NewRouter()
