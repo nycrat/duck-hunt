@@ -9,6 +9,8 @@ import { Route, Router } from "@solidjs/router"
 import Welcome from "./Welcome"
 import NotFound from "./NotFound"
 import { MetaProvider } from "@solidjs/meta"
+import Leaderboard from "./Leaderboard"
+import Activities from "./Activities"
 
 const root = document.getElementById("root")
 
@@ -23,6 +25,8 @@ render(
     <MetaProvider>
       <Router>
         <Route path="/" component={Welcome} />
+        <Route path="/leaderboard" component={Leaderboard} />
+        <Route path="/activities" component={Activities} />
         <Route path="*" component={NotFound} />
       </Router>
     </MetaProvider>

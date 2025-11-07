@@ -7,9 +7,7 @@ const NotFound = () => {
       <Title>Page Not Found | DuckHunt</Title>
       <main class="max-w-[1200px] m-auto">
         <h1>404 page not found</h1>
-        <A href="/" class="underline text-blue-600">
-          click here to return
-        </A>
+        <A href="/">click here to return</A>
       </main>
     </div>
   )

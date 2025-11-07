@@ -11,6 +11,11 @@ h1 {
   @apply text-3xl;
 }
 
+a {
+  @apply underline;
+  @apply text-blue-600;
+}
+
 * {
   @apply tracking-tight;
 }
