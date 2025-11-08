@@ -1,17 +1,20 @@
 import { Title } from "@solidjs/meta"
 import { A } from "@solidjs/router"
+import { createResource, Match, Show, Switch } from "solid-js"
+
+interface Activity {
+  title: string
+  points: number
+  link: string
+}
+
+const fetchActivities = async (): Promise<Activity[]> => {
+  const response = await fetch("http://localhost:8000/activities")
+  return response.json()
+}
 
 const Activities = () => {
-  const activities = [
-    { title: "Attend SUS's Workshop", points: 50, link: "/activities/tech" },
-    {
-      title: "Speed typing competition",
-      points: 100,
-      link: "/activities/tech",
-    },
-    { title: "SUS Jeopardy Event", points: 100, link: "/activities/tech" },
-    { title: "Visit 5 Club Booths", points: 200, link: "/activities/tech" },
-  ]
+  const [activities] = createResource(fetchActivities)
 
   return (
     <main class="h-screen p-10 flex flex-col gap-1">
@@ -25,19 +28,26 @@ const Activities = () => {
         <button>Todo</button>
       </div>
 
-      <div>
-        <ol>
-          {activities
-            .toSorted((a, b) => b.points - a.points)
-            .map((activity) => (
-              <li>
-                <A href={activity.link}>
-                  {`${activity.title} (${activity.points}pts)`}
-                </A>
-              </li>
-            ))}
-        </ol>
-      </div>
+      <Show when={activities.loading}>loading...</Show>
+
+      <Switch>
+        <Match when={activities.error}>Error: {activities.error}</Match>
+        <Match when={activities()}>
+          <div>
+            <ol>
+              {activities()!
+                .toSorted((a, b) => b.points - a.points)
+                .map((activity) => (
+                  <li>
+                    <A href={activity.link}>
+                      {`${activity.title} (${activity.points}pts)`}
+                    </A>
+                  </li>
+                ))}
+            </ol>
+          </div>
+        </Match>
+      </Switch>
 
       <div class="grow" />
 

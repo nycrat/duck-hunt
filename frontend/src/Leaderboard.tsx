@@ -3,17 +3,17 @@ import { A } from "@solidjs/router"
 import { createResource, Match, Show, Switch } from "solid-js"
 
 interface Participant {
-  name: string,
+  name: string
   score: number
 }
 
 const fetchParticipants = async (): Promise<Participant[]> => {
-  const response = await fetch("http://localhost:8000/")
+  const response = await fetch("http://localhost:8000/participants")
   return response.json()
 }
 
 const Leaderboard = () => {
-  const [participants] = createResource(fetchParticipants);
+  const [participants] = createResource(fetchParticipants)
 
   return (
     <main class="h-screen p-10 flex flex-col gap-1">
@@ -21,14 +21,10 @@ const Leaderboard = () => {
 
       <h1>Leaderboard</h1>
 
-      <Show when={participants.loading}>
-        loading...
-      </Show>
+      <Show when={participants.loading}>loading...</Show>
 
       <Switch>
-        <Match when={participants.error}>
-          Error: {participants.error}
-        </Match>
+        <Match when={participants.error}>Error: {participants.error}</Match>
         <Match when={participants()}>
           <div>
             <ol class="list-decimal list-inside">
