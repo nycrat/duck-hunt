@@ -3,8 +3,8 @@ import { useNavigate } from "@solidjs/router"
 import { createSignal } from "solid-js"
 
 const Welcome = () => {
-  const [code, setCode] = createSignal("")
-  const [id, setId] = createSignal("")
+  const [eventCode, setEventCode] = createSignal("")
+  const [passCode, setPassCode] = createSignal("")
   const navigate = useNavigate()
 
   return (
@@ -12,12 +12,27 @@ const Welcome = () => {
       <Title>Welcome | DuckHunt</Title>
       <form
         class="flex flex-col gap-1 items-center"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault()
-          if (code() === "test") {
+
+          const res = await fetch("http://localhost:8000/auth", {
+            method: "POST",
+            headers: {
+              Authorization: `Basic ${passCode()}`,
+            },
+          })
+
+          if (res.status !== 200) {
+            alert("Issue with authorization request")
+            return
+          }
+
+          localStorage.setItem("jwtToken", await res.text())
+
+          if (eventCode() === "test") {
             navigate("/leaderboard")
           } else {
-            alert(`Event (${code()}) not found.`)
+            alert(`Event (${eventCode()}) not found.`)
           }
         }}
       >
@@ -26,9 +41,9 @@ const Welcome = () => {
         <input
           type="text"
           name="code"
-          value={code()}
+          value={eventCode()}
           onInput={(e) => {
-            setCode(e.target.value)
+            setEventCode(e.target.value)
           }}
           placeholder="Enter event code"
           class="text-center"
@@ -37,16 +52,16 @@ const Welcome = () => {
         <input
           type="password"
           name="id"
-          value={id()}
+          value={passCode()}
           onInput={(e) => {
-            setId(e.target.value)
+            setPassCode(e.target.value)
           }}
           placeholder="Enter your ID"
           class="text-center"
         />
         <button
           type="submit"
-          disabled={code() === "" || id() === ""}
+          disabled={eventCode() === "" || passCode() === ""}
           class="disabled:text-gray-500 disabled:outline-gray-500 rounded outline-black outline-1
                  w-min px-2 not-disabled:hover:bg-gray-300 not-disabled:cursor-pointer"
         >

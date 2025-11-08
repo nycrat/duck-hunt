@@ -9,7 +9,11 @@ interface Activity {
 }
 
 const fetchActivities = async (): Promise<Activity[]> => {
-  const response = await fetch("http://localhost:8000/activities")
+  const response = await fetch("http://localhost:8000/activities", {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+    },
+  })
   return response.json()
 }
 

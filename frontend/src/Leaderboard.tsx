@@ -8,7 +8,11 @@ interface Participant {
 }
 
 const fetchParticipants = async (): Promise<Participant[]> => {
-  const response = await fetch("http://localhost:8000/participants")
+  const response = await fetch("http://localhost:8000/participants", {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+    },
+  })
   return response.json()
 }
 
