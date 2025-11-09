@@ -27,7 +27,7 @@ if [[ $FRONTEND = 1 || $BOTH = 1 ]]; then
 fi
 
 if [[ $BACKEND = 1 || $BOTH = 1 ]]; then
-  cd backend; go run . $JWT_HS256_KEY $CONSTANT_SALT $DATABASE_URL &
+  cd backend; go run . $JWT_HS256_KEY $PEPPER $DATABASE_URL &
 fi
 
 wait

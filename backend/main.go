@@ -117,8 +117,8 @@ func generateJwtToken(id int, key []byte) string {
 	return signedToken
 }
 
-func dbSelectId(passcode string, salt []byte, db *sql.DB) (int, bool) {
-	hashedPasscode, err := pbkdf2.Key(crypto.SHA256.New, passcode, salt, 4096, 64)
+func dbSelectId(passcode string, pepper []byte, db *sql.DB) (int, bool) {
+	hashedPasscode, err := pbkdf2.Key(crypto.SHA256.New, passcode, pepper, 4096, 64)
 
 	if err != nil {
 		log.Fatal(err)
@@ -138,11 +138,11 @@ func dbSelectId(passcode string, salt []byte, db *sql.DB) (int, bool) {
 
 func main() {
 	if len(os.Args) < 4 {
-		log.Fatal("Not enough arguments please specify RSA_PRIVATE_KEY CONSTANT_SALT DATABASE_URL")
+		log.Fatal("Not enough arguments please specify JWT_HS256_KEY PEPPER DATABASE_URL")
 	}
 
 	hs256Key := []byte(os.Args[1])
-	constantSalt := []byte(os.Args[2])
+	pepper := []byte(os.Args[2])
 	dbConnStr := os.Args[3]
 	db, err := sql.Open("postgres", dbConnStr)
 
@@ -169,7 +169,7 @@ func main() {
 			return
 		}
 
-		id, ok := dbSelectId(passcode, constantSalt, db)
+		id, ok := dbSelectId(passcode, pepper, db)
 
 		if !ok {
 			w.WriteHeader(http.StatusUnauthorized)
