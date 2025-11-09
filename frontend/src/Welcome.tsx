@@ -1,11 +1,32 @@
 import { Title } from "@solidjs/meta"
 import { useNavigate } from "@solidjs/router"
-import { createSignal } from "solid-js"
+import { createEffect, createResource, createSignal } from "solid-js"
+
+const fetchSessionId = async (): Promise<number | null> => {
+  const response = await fetch("http://localhost:8000/session", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+    },
+  })
+  if (response.status !== 200) {
+    return null
+  }
+  return parseInt(await response.text())
+}
 
 const Welcome = () => {
   const [eventCode, setEventCode] = createSignal("")
   const [passCode, setPassCode] = createSignal("")
   const navigate = useNavigate()
+
+  const [id] = createResource(fetchSessionId)
+
+  createEffect(() => {
+    if (id()) {
+      navigate("/leaderboard")
+    }
+  })
 
   return (
     <main class="h-screen flex justify-center items-center text-center">

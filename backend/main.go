@@ -180,6 +180,30 @@ func main() {
 		w.Write([]byte(token))
 	})
 
+	r.Post("/session", func(w http.ResponseWriter, r *http.Request) {
+		scheme, tokenString, found := strings.Cut(r.Header.Get("Authorization"), " ")
+
+		if !found || scheme != "Bearer" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		id, ok := validateJwtToken(tokenString, hs256Key)
+
+		if !ok {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		body, err := json.Marshal(id)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		w.Write(body)
+	})
+
 	r.Get("/participants", func(w http.ResponseWriter, r *http.Request) {
 		scheme, tokenString, found := strings.Cut(r.Header.Get("Authorization"), " ")
 
