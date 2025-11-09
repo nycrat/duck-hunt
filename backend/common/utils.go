@@ -13,56 +13,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func DbFetchParticipants(db *sql.DB) []types.Participant {
-	rows, err := db.Query("SELECT name, score FROM participants")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	participants := []types.Participant{}
-
-	for rows.Next() {
-		var name string
-		var score int
-		err := rows.Scan(&name, &score)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		name = strings.TrimSpace(name)
-		participants = append(participants, types.Participant{Name: name, Score: score})
-	}
-
-	return participants
-}
-
-func DbFetchActivities(db *sql.DB) []types.Activity {
-	rows, err := db.Query("SELECT title, points, link FROM activities")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	activities := []types.Activity{}
-
-	for rows.Next() {
-		var title string
-		var points int
-		var link string
-		err := rows.Scan(&title, &points, &link)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		title = strings.TrimSpace(title)
-		link = strings.TrimSpace(link)
-		activities = append(activities, types.Activity{Title: title, Points: points, Link: link})
-	}
-
-	return activities
-}
-
 func ValidateJwtToken(jwtString string, key []byte) (int, bool) {
 	token, err := jwt.Parse(jwtString, func(t *jwt.Token) (any, error) {
 		return key, nil
@@ -98,6 +48,70 @@ func GenerateJwtToken(id int, key []byte) string {
 	}
 
 	return signedToken
+}
+
+func DbFetchParticipants(db *sql.DB) []types.Participant {
+	rows, err := db.Query("SELECT name, score FROM participants")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	participants := []types.Participant{}
+
+	for rows.Next() {
+		var name string
+		var score int
+		err := rows.Scan(&name, &score)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		name = strings.TrimSpace(name)
+		participants = append(participants, types.Participant{Name: name, Score: score})
+	}
+
+	return participants
+}
+
+func DbFetchActivityPreviews(db *sql.DB) []types.ActivityPreview {
+	rows, err := db.Query("SELECT title, points FROM activities")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	activities := []types.ActivityPreview{}
+
+	for rows.Next() {
+		var title string
+		var points int
+		err := rows.Scan(&title, &points)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		title = strings.TrimSpace(title)
+		activities = append(activities, types.ActivityPreview{Title: title, Points: points})
+	}
+
+	return activities
+}
+
+func DbFetchActivity(db *sql.DB, title string) (types.Activity, bool) {
+	var points int
+	var description string
+	err := db.QueryRow(`SELECT points, description FROM activities WHERE title = $1`, title).Scan(&points, &description)
+
+	if err != nil {
+		return types.Activity{}, false
+	}
+
+	return types.Activity{
+		Title:       title,
+		Points:      points,
+		Description: description,
+	}, true
 }
 
 func DbSelectId(passcode string, pepper []byte, db *sql.DB) (int, bool) {

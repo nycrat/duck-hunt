@@ -11,6 +11,7 @@ import NotFound from "./NotFound"
 import { MetaProvider } from "@solidjs/meta"
 import Leaderboard from "./Leaderboard"
 import Activities from "./Activities"
+import Submission from "./Submission"
 
 const root = document.getElementById("root")
 
@@ -27,6 +28,7 @@ render(
         <Route path="/" component={Welcome} />
         <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/activities" component={Activities} />
+        <Route path="/activities/:title" component={Submission} />
         <Route path="*" component={NotFound} />
       </Router>
     </MetaProvider>

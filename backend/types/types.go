@@ -5,8 +5,16 @@ type Participant struct {
 	Score int    `json:"score"`
 }
 
-type Activity struct {
+type ActivityPreview struct {
 	Title  string `json:"title"`
 	Points int    `json:"points"`
-	Link   string `json:"link"`
+}
+
+type Activity struct {
+	Title       string `json:"title"`
+	Points      int    `json:"points"`
+	Description string `json:"description"`
+}
+
+type Submission struct {
 }

@@ -49,7 +49,8 @@ func main() {
 	r.Post("/session", api.HandlePostSession)
 
 	r.Get("/participants", api.HandleGetParticipants)
-	r.Get("/activities", api.HandleGetActivites)
+	r.Get("/activities", api.HandleGetActivityPreviews)
+	r.Get("/activities/{title}", api.HandleGetActivity)
 
 	log.Println("Launched go web server on :8000")
 	http.ListenAndServe(":8000", r)

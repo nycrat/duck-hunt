@@ -5,7 +5,7 @@ import { createResource, Match, Show, Switch } from "solid-js"
 interface Activity {
   title: string
   points: number
-  link: string
+  description: string
 }
 
 const fetchActivities = async (): Promise<Activity[]> => {
@@ -43,7 +43,7 @@ const Activities = () => {
                 .toSorted((a, b) => b.points - a.points)
                 .map((activity) => (
                   <li>
-                    <A href={activity.link}>
+                    <A href={`/activities/${activity.title}`}>
                       {`${activity.title} (${activity.points}pts)`}
                     </A>
                   </li>

@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func HandleGetActivites(w http.ResponseWriter, r *http.Request) {
+func HandleGetActivityPreviews(w http.ResponseWriter, r *http.Request) {
 	id := r.Context().Value("id")
 	if id == nil {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -16,7 +16,7 @@ func HandleGetActivites(w http.ResponseWriter, r *http.Request) {
 
 	db := r.Context().Value("db").(*sql.DB)
 
-	activities := common.DbFetchActivities(db)
+	activities := common.DbFetchActivityPreviews(db)
 	serialized, _ := json.Marshal(activities)
 	w.Write(serialized)
 }
