@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto"
 	"crypto/pbkdf2"
 	"database/sql"
@@ -136,6 +137,30 @@ func dbSelectId(passcode string, pepper []byte, db *sql.DB) (int, bool) {
 	return id, true
 }
 
+func jwtMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		scheme, tokenString, found := strings.Cut(r.Header.Get("Authorization"), " ")
+
+		if !found || scheme != "Bearer" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		// TODO fix this
+		hs256Key := []byte(os.Args[1])
+		id, ok := validateJwtToken(tokenString, hs256Key)
+
+		if !ok {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "id", id)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 func main() {
 	if len(os.Args) < 4 {
 		log.Fatal("Not enough arguments please specify JWT_HS256_KEY PEPPER DATABASE_URL")
@@ -152,6 +177,7 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	r.Use(jwtMiddleware)
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{"http://*"},
 
@@ -181,16 +207,8 @@ func main() {
 	})
 
 	r.Post("/session", func(w http.ResponseWriter, r *http.Request) {
-		scheme, tokenString, found := strings.Cut(r.Header.Get("Authorization"), " ")
-
-		if !found || scheme != "Bearer" {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		id, ok := validateJwtToken(tokenString, hs256Key)
-
-		if !ok {
+		id := r.Context().Value("id")
+		if id == nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -205,16 +223,8 @@ func main() {
 	})
 
 	r.Get("/participants", func(w http.ResponseWriter, r *http.Request) {
-		scheme, tokenString, found := strings.Cut(r.Header.Get("Authorization"), " ")
-
-		if !found || scheme != "Bearer" {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		_, ok := validateJwtToken(tokenString, hs256Key)
-
-		if !ok {
+		id := r.Context().Value("id")
+		if id == nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -225,16 +235,8 @@ func main() {
 	})
 
 	r.Get("/activities", func(w http.ResponseWriter, r *http.Request) {
-		scheme, tokenString, found := strings.Cut(r.Header.Get("Authorization"), " ")
-
-		if !found || scheme != "Bearer" {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		_, ok := validateJwtToken(tokenString, hs256Key)
-
-		if !ok {
+		id := r.Context().Value("id")
+		if id == nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
