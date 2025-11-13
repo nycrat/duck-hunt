@@ -27,8 +27,6 @@ func ValidateJwtToken(jwtString string, key []byte) (int, bool) {
 		return int(claims["sub"].(float64)), true
 	}
 
-	// TODO implement checking exp
-
 	return 0, false
 }
 
