@@ -130,3 +130,34 @@ func DbSelectId(passcode string, pepper []byte, db *sql.DB) (int, bool) {
 
 	return id, true
 }
+
+func DbFetchSubmissions(db *sql.DB, id int, title string) []types.Submission {
+	rows, err := db.Query(`SELECT status, image FROM submissions WHERE participant_id = $1 AND activity_title = $2`, id, title)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	submissions := []types.Submission{}
+
+	for rows.Next() {
+		var status string
+		var image []byte
+		err := rows.Scan(&status, &image)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		submissions = append(submissions, types.Submission{Status: status, Image: image})
+	}
+
+	return submissions
+}
+
+func DbPostNewSubmission(db *sql.DB, id int, title string, image []byte) {
+	_, err := db.Query(`INSERT INTO submissions (participant_id, activity_title, image) VALUES($1, $2, $3)`, id, title, image)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}

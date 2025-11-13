@@ -29,6 +29,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	defer db.Close()
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(cors.Handler(cors.Options{
@@ -51,6 +53,9 @@ func main() {
 	r.Get("/participants", api.HandleGetParticipants)
 	r.Get("/activities", api.HandleGetActivityPreviews)
 	r.Get("/activities/{title}", api.HandleGetActivity)
+
+	r.Get("/submissions/{title}", api.HandleGetSubmissions)
+	r.Post("/submissions/{title}", api.HandlePostSubmission)
 
 	log.Println("Launched go web server on :8000")
 	http.ListenAndServe(":8000", r)

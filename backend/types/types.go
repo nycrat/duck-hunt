@@ -16,5 +16,10 @@ type Activity struct {
 	Description string `json:"description"`
 }
 
+// Status: "unreviewed" | "rejected" | "accepted"
+//
+// Image: []byte
 type Submission struct {
+	Status string `json:"status"`
+	Image  []byte `json:"image"`
 }
