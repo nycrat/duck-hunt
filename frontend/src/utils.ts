@@ -1,4 +1,4 @@
-export const compressImage = async (imageFile: File): Promise<Blob | null> => {
+const imageToCanvas = async (imageFile: File): Promise<HTMLCanvasElement> => {
   return new Promise((resolve, _reject) => {
     const reader = new FileReader()
     reader.onload = (ev) => {
@@ -19,8 +19,7 @@ export const compressImage = async (imageFile: File): Promise<Blob | null> => {
         canvas.height = height
 
         ctx.drawImage(image, 0, 0, width, height)
-
-        canvas.toBlob(resolve, "image/jpeg", 0.7)
+        resolve(canvas)
       }
 
       if (!ev.target || !ev.target.result) return
@@ -29,5 +28,15 @@ export const compressImage = async (imageFile: File): Promise<Blob | null> => {
     }
 
     reader.readAsDataURL(imageFile)
+  })
+}
+
+export const imageToImageURL = async (imageFile: File): Promise<string> => {
+  return (await imageToCanvas(imageFile)).toDataURL()
+}
+
+export const imageToBlob = async (imageFile: File): Promise<Blob | null> => {
+  return new Promise(async (resolve, _reject) => {
+    ;(await imageToCanvas(imageFile)).toBlob(resolve, "image/jpeg", 0.7)
   })
 }

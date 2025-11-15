@@ -1,7 +1,7 @@
 import { Title } from "@solidjs/meta"
 import { A, useParams } from "@solidjs/router"
 import { createResource, createSignal, Match, Show, Switch } from "solid-js"
-import { compressImage } from "./utils"
+import { imageToBlob, imageToImageURL } from "./utils"
 
 interface Activity {
   title: string
@@ -11,7 +11,7 @@ interface Activity {
 
 interface Submission {
   status: "unreviewed" | "rejected" | "accepted"
-  description: string
+  image: string
 }
 
 const fetchActivityInfo = async (title: string): Promise<Activity | null> => {
@@ -67,6 +67,8 @@ const SubmissionPage = () => {
 
   const [image, setImage] = createSignal<File | null>(null)
 
+  const [imagePreview] = createResource(image, imageToImageURL)
+
   return (
     <main class="h-screen p-10 flex flex-col gap-1">
       <Title>{decodeURI(params.title)} | DuckHunt</Title>
@@ -92,7 +94,7 @@ const SubmissionPage = () => {
               const imageFile = image()
               if (!imageFile) return
 
-              const imageBlob = await compressImage(imageFile)
+              const imageBlob = await imageToBlob(imageFile)
               if (imageBlob) postSubmission(params.title, imageBlob)
             }}
           >
@@ -122,11 +124,18 @@ const SubmissionPage = () => {
               }}
             />
             <input type="submit" />
+
+            <Show when={imagePreview()}>
+              <img src={imagePreview()} />
+            </Show>
           </form>
 
           <Show when={submissions()}>
             {submissions()!.map((submission) => (
-              <div>{submission.status}</div>
+              <div>
+                {submission.status}{" "}
+                <img src={`data:image/jpeg;base64,${submission.image}`} />
+              </div>
             ))}
           </Show>
         </Match>
