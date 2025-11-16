@@ -11,6 +11,12 @@ h1 {
   @apply text-3xl;
 }
 
+h2 {
+  @apply font-display;
+  @apply tracking-wide;
+  @apply text-2xl;
+}
+
 a {
   @apply underline;
   @apply text-blue-600;

@@ -1,7 +1,7 @@
 import { Title } from "@solidjs/meta"
 import { A, useParams } from "@solidjs/router"
 import { createResource, createSignal, Match, Show, Switch } from "solid-js"
-import { imageToBlob, imageToImageURL } from "./utils"
+import { imageToBlob, imageToImageURL, toTitleCase } from "./utils"
 
 interface Activity {
   title: string
@@ -63,7 +63,10 @@ const SubmissionPage = () => {
   const params = useParams()
 
   const [activity] = createResource(params.title, fetchActivityInfo)
-  const [submissions] = createResource(params.title, fetchPreviousSubmissions)
+  const [submissions, { refetch: refetchSubmissions }] = createResource(
+    params.title,
+    fetchPreviousSubmissions,
+  )
 
   const [image, setImage] = createSignal<File | null>(null)
 
@@ -88,6 +91,7 @@ const SubmissionPage = () => {
           <div class="h-px my-2 bg-black" />
 
           <form
+            class="flex gap-2"
             onSubmit={async (ev) => {
               ev.preventDefault()
 
@@ -95,14 +99,17 @@ const SubmissionPage = () => {
               if (!imageFile) return
 
               const imageBlob = await imageToBlob(imageFile)
-              if (imageBlob) postSubmission(params.title, imageBlob)
+              if (imageBlob) await postSubmission(params.title, imageBlob)
+
+              setImage(null)
+              refetchSubmissions()
             }}
           >
             <label
               for="image-upload"
               class="outline px-3 py-1 rounded-full hover:bg-gray-300"
             >
-              Upload photo
+              Select photo
             </label>
             <input
               id="image-upload"
@@ -123,20 +130,32 @@ const SubmissionPage = () => {
                 setImage(image)
               }}
             />
-            <input type="submit" />
-
-            <Show when={imagePreview()}>
-              <img src={imagePreview()} />
-            </Show>
+            <label
+              for="submit"
+              class="outline px-3 py-1 rounded-full hover:bg-gray-300"
+            >
+              Submit
+            </label>
+            <input id="submit" type="submit" class="hidden" />
           </form>
 
+          <Show when={imagePreview() && image()}>
+            <img src={imagePreview()} />
+          </Show>
+
+          <div class="h-px my-2 bg-black" />
+
+          <h2>Submissions</h2>
+
           <Show when={submissions()}>
-            {submissions()!.map((submission) => (
-              <div>
-                {submission.status}{" "}
-                <img src={`data:image/jpeg;base64,${submission.image}`} />
-              </div>
-            ))}
+            <ul class="list-inside list-decimal overflow-y-scroll">
+              {submissions()!.map((submission) => (
+                <li>
+                  {toTitleCase(submission.status)}
+                  <img src={`data:image/jpeg;base64,${submission.image}`} />
+                </li>
+              ))}
+            </ul>
           </Show>
         </Match>
       </Switch>

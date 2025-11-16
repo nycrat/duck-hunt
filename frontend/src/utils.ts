@@ -40,3 +40,7 @@ export const imageToBlob = async (imageFile: File): Promise<Blob | null> => {
     ;(await imageToCanvas(imageFile)).toBlob(resolve, "image/jpeg", 0.7)
   })
 }
+
+export const toTitleCase = (s: string): string => {
+  return s.slice(0, 1).toUpperCase() + s.slice(1)
+}
