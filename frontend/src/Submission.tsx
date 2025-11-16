@@ -131,12 +131,14 @@ const SubmissionPage = () => {
           </form>
 
           <Show when={submissions()}>
-            {submissions()!.map((submission) => (
-              <div>
-                {submission.status}{" "}
-                <img src={`data:image/jpeg;base64,${submission.image}`} />
-              </div>
-            ))}
+            <ul class="list-inside list-disc overflow-y-scroll">
+              {submissions()!.map((submission) => (
+                <li>
+                  {submission.status}{" "}
+                  <img src={`data:image/jpeg;base64,${submission.image}`} />
+                </li>
+              ))}
+            </ul>
           </Show>
         </Match>
       </Switch>
