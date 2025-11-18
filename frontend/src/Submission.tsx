@@ -20,11 +20,15 @@ interface Submission {
 }
 
 const fetchActivityInfo = async (title: string): Promise<Activity | null> => {
-  const response = await fetch(`${getServerURL()}/activities/${title}`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+  const properlyEncodedTitle = title.replaceAll("'", "%27")
+  const response = await fetch(
+    `${getServerURL()}/activities/${properlyEncodedTitle}`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
     },
-  })
+  )
 
   if (response.status !== 200) {
     return null
@@ -61,7 +65,6 @@ const postSubmission = async (title: string, image: Blob): Promise<boolean> => {
 
   return response.status === 200
 }
-
 const MAX_FILE_SIZE_BYTES = 10_000_000
 
 const SubmissionPage = () => {
