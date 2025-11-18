@@ -22,7 +22,7 @@ if [[ $FRONTEND != 1 && $BACKEND != 1 ]]; then
 fi
 
 if [[ $FRONTEND = 1 || $BOTH = 1 ]]; then
-  cd frontend; npm run dev &
+  cd frontend; npm run dev -- --host &
   cd ..
 fi
 

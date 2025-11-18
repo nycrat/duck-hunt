@@ -1,9 +1,10 @@
 import { Title } from "@solidjs/meta"
 import { useNavigate } from "@solidjs/router"
 import { createEffect, createResource, createSignal } from "solid-js"
+import { getServerURL } from "./utils"
 
 const fetchSessionId = async (): Promise<number | null> => {
-  const response = await fetch("http://localhost:8000/session", {
+  const response = await fetch(`${getServerURL()}/session`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -36,7 +37,7 @@ const Welcome = () => {
         onSubmit={async (e) => {
           e.preventDefault()
 
-          const res = await fetch("http://localhost:8000/auth", {
+          const res = await fetch(`${getServerURL()}/auth`, {
             method: "POST",
             headers: {
               Authorization: `Basic ${passCode()}`,

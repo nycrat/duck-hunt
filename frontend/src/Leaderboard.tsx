@@ -1,6 +1,7 @@
 import { Title } from "@solidjs/meta"
 import { A } from "@solidjs/router"
 import { createResource, Match, Show, Switch } from "solid-js"
+import { getServerURL } from "./utils"
 
 interface Participant {
   name: string
@@ -8,7 +9,7 @@ interface Participant {
 }
 
 const fetchParticipants = async (): Promise<Participant[]> => {
-  const response = await fetch("http://localhost:8000/participants", {
+  const response = await fetch(`${getServerURL()}/participants`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
     },

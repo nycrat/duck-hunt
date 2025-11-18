@@ -36,11 +36,15 @@ export const imageToImageURL = async (imageFile: File): Promise<string> => {
 }
 
 export const imageToBlob = async (imageFile: File): Promise<Blob | null> => {
-  return new Promise(async (resolve, _reject) => {
-    ;(await imageToCanvas(imageFile)).toBlob(resolve, "image/jpeg", 0.7)
-  })
+  return new Promise(async (resolve, _reject) =>
+    (await imageToCanvas(imageFile)).toBlob(resolve, "image/jpeg", 0.7),
+  )
 }
 
 export const toTitleCase = (s: string): string => {
   return s.slice(0, 1).toUpperCase() + s.slice(1)
+}
+
+export const getServerURL = (): string => {
+  return import.meta.env.VITE_API_URL ?? "http://localhost:8000"
 }

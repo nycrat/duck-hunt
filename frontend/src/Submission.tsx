@@ -1,7 +1,12 @@
 import { Title } from "@solidjs/meta"
 import { A, useParams } from "@solidjs/router"
 import { createResource, createSignal, Match, Show, Switch } from "solid-js"
-import { imageToBlob, imageToImageURL, toTitleCase } from "./utils"
+import {
+  getServerURL,
+  imageToBlob,
+  imageToImageURL,
+  toTitleCase,
+} from "./utils"
 
 interface Activity {
   title: string
@@ -15,7 +20,7 @@ interface Submission {
 }
 
 const fetchActivityInfo = async (title: string): Promise<Activity | null> => {
-  const response = await fetch(`http://localhost:8000/activities/${title}`, {
+  const response = await fetch(`${getServerURL()}/activities/${title}`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
     },
@@ -31,7 +36,7 @@ const fetchActivityInfo = async (title: string): Promise<Activity | null> => {
 const fetchPreviousSubmissions = async (
   title: string,
 ): Promise<Submission[] | null> => {
-  const response = await fetch(`http://localhost:8000/submissions/${title}`, {
+  const response = await fetch(`${getServerURL()}/submissions/${title}`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
     },
@@ -46,7 +51,7 @@ const fetchPreviousSubmissions = async (
 
 const postSubmission = async (title: string, image: Blob): Promise<boolean> => {
   console.log(title, image)
-  const response = await fetch(`http://localhost:8000/submissions/${title}`, {
+  const response = await fetch(`${getServerURL()}/submissions/${title}`, {
     method: "POST",
     body: image,
     headers: {
