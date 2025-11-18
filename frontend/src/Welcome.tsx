@@ -30,7 +30,7 @@ const Welcome = () => {
   })
 
   return (
-    <main class="h-screen flex justify-center items-center text-center">
+    <main class="h-dvh flex justify-center items-center text-center">
       <Title>Welcome | DuckHunt</Title>
       <form
         class="flex flex-col gap-1 items-center"

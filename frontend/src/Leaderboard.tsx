@@ -21,7 +21,7 @@ const Leaderboard = () => {
   const [participants] = createResource(fetchParticipants)
 
   return (
-    <main class="h-screen p-10 flex flex-col gap-1">
+    <main class="h-dvh p-10 flex flex-col gap-1">
       <Title>Leaderboard | DuckHunt</Title>
 
       <h1>Leaderboard</h1>
