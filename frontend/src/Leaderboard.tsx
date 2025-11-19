@@ -1,21 +1,7 @@
 import { Title } from "@solidjs/meta"
 import { A } from "@solidjs/router"
 import { createResource, Match, Show, Switch } from "solid-js"
-import { getServerURL } from "./utils"
-
-interface Participant {
-  name: string
-  score: number
-}
-
-const fetchParticipants = async (): Promise<Participant[]> => {
-  const response = await fetch(`${getServerURL()}/participants`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-    },
-  })
-  return response.json()
-}
+import { fetchParticipants } from "./api"
 
 const Leaderboard = () => {
   const [participants] = createResource(fetchParticipants)

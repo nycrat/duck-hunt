@@ -49,7 +49,7 @@ func GenerateJwtToken(id int, key []byte) string {
 }
 
 func DbFetchParticipants(db *sql.DB) []types.Participant {
-	rows, err := db.Query("SELECT name, score FROM participants")
+	rows, err := db.Query("SELECT id, name, score FROM participants")
 
 	if err != nil {
 		log.Fatal(err)
@@ -58,15 +58,16 @@ func DbFetchParticipants(db *sql.DB) []types.Participant {
 	participants := []types.Participant{}
 
 	for rows.Next() {
+		var id int
 		var name string
 		var score int
-		err := rows.Scan(&name, &score)
+		err := rows.Scan(&id, &name, &score)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		name = strings.TrimSpace(name)
-		participants = append(participants, types.Participant{Name: name, Score: score})
+		participants = append(participants, types.Participant{Id: id, Name: name, Score: score})
 	}
 
 	return participants
