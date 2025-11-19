@@ -7,17 +7,7 @@ import {
   imageToImageURL,
   toTitleCase,
 } from "./utils"
-
-interface Activity {
-  title: string
-  points: number
-  description: string
-}
-
-interface Submission {
-  status: "unreviewed" | "rejected" | "accepted"
-  image: string
-}
+import { Activity, Submission } from "./types"
 
 const fetchActivityInfo = async (title: string): Promise<Activity | null> => {
   const properlyEncodedTitle = title.replaceAll("'", "%27")

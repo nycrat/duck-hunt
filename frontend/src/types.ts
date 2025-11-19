@@ -9,3 +9,8 @@ export interface Activity {
   points: number
   description: string
 }
+
+export interface Submission {
+  status: "unreviewed" | "rejected" | "accepted"
+  image: string
+}
