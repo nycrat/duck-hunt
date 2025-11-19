@@ -24,3 +24,8 @@ type Submission struct {
 	Status string `json:"status"`
 	Image  []byte `json:"image"`
 }
+
+type ActivitySubmissions struct {
+	Title string `json:"title"`
+	Count int    `json:"count"`
+}

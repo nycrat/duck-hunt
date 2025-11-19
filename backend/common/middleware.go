@@ -25,6 +25,7 @@ func GetJwtMiddleware(hs256Key []byte) func(http.Handler) http.Handler {
 			}
 
 			ctx := context.WithValue(r.Context(), "id", id)
+			ctx = context.WithValue(ctx, "admin", id == 1)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

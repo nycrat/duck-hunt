@@ -59,6 +59,8 @@ func main() {
 	r.Get("/submissions/{title}", api.HandleGetSubmissions)
 	r.Post("/submissions/{title}", api.HandlePostSubmission)
 
+	r.Get("/participants/{id}/submission_counts", api.HandleGetParticipantSubmissionCounts)
+
 	log.Println("Launched go web server on :8000")
 	http.ListenAndServe(":8000", r)
 }

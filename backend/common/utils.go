@@ -184,3 +184,15 @@ func DbFetchParticipantById(db *sql.DB, id int) (types.Participant, bool) {
 
 	return types.Participant{Id: id, Name: name, Score: score}, true
 }
+
+func DbCountNumberOfSubmissions(db *sql.DB, id int, title string) (int, bool) {
+	var count int
+	err := db.QueryRow(`SELECT COUNT(*) FROM submissions WHERE participant_id = $1 AND activity_title = $2`, id, title).Scan(&count)
+
+	if err != nil {
+		log.Println(err)
+		return 0, false
+	}
+
+	return count, true
+}

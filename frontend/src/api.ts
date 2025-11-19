@@ -1,4 +1,4 @@
-import { Activity, Participant } from "./types"
+import { Activity, ActivitySubmissions, Participant } from "./types"
 import { getServerURL } from "./utils"
 
 export const fetchParticipants = async (): Promise<Participant[]> => {
@@ -27,5 +27,19 @@ export const fetchActivities = async (): Promise<Activity[]> => {
       Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
     },
   })
+  return response.json()
+}
+
+export const fetchParticipantSubmissions = async (
+  id: number,
+): Promise<ActivitySubmissions[]> => {
+  const response = await fetch(
+    `${getServerURL()}/participants/${id}/submission_counts`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
+    },
+  )
   return response.json()
 }
