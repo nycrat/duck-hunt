@@ -20,10 +20,19 @@ func HandleGetParticipantInfo(w http.ResponseWriter, r *http.Request) {
 	targetId, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
-	participants := common.DbFetchParticipantById(db, int(targetId))
+	participants, ok := common.DbFetchParticipantById(db, int(targetId))
+
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	serialized, _ := json.Marshal(participants)
 	w.Write(serialized)
 }

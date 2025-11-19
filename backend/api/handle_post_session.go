@@ -16,7 +16,10 @@ func HandlePostSession(w http.ResponseWriter, r *http.Request) {
 	body, err := json.Marshal(id)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	w.Write(body)

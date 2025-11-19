@@ -30,7 +30,7 @@ func ValidateJwtToken(jwtString string, key []byte) (int, bool) {
 	return 0, false
 }
 
-func GenerateJwtToken(id int, key []byte) string {
+func GenerateJwtToken(id int, key []byte) (string, bool) {
 	duration := 48 * 60 * 60 * 1000 * 1000 * 1000 // 2 days in nanoseconds
 	expirationTime := time.Now().Add(time.Duration(duration)).Unix()
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256,
@@ -42,17 +42,19 @@ func GenerateJwtToken(id int, key []byte) string {
 	signedToken, err := t.SignedString(key)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return "", false
 	}
 
-	return signedToken
+	return signedToken, true
 }
 
-func DbFetchParticipants(db *sql.DB) []types.Participant {
+func DbFetchParticipants(db *sql.DB) ([]types.Participant, bool) {
 	rows, err := db.Query("SELECT id, name, score FROM participants")
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return []types.Participant{}, false
 	}
 
 	participants := []types.Participant{}
@@ -63,21 +65,23 @@ func DbFetchParticipants(db *sql.DB) []types.Participant {
 		var score int
 		err := rows.Scan(&id, &name, &score)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return []types.Participant{}, false
 		}
 
 		name = strings.TrimSpace(name)
 		participants = append(participants, types.Participant{Id: id, Name: name, Score: score})
 	}
 
-	return participants
+	return participants, true
 }
 
-func DbFetchActivityPreviews(db *sql.DB) []types.ActivityPreview {
+func DbFetchActivityPreviews(db *sql.DB) ([]types.ActivityPreview, bool) {
 	rows, err := db.Query("SELECT title, points FROM activities")
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return []types.ActivityPreview{}, false
 	}
 
 	activities := []types.ActivityPreview{}
@@ -87,14 +91,15 @@ func DbFetchActivityPreviews(db *sql.DB) []types.ActivityPreview {
 		var points int
 		err := rows.Scan(&title, &points)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return []types.ActivityPreview{}, false
 		}
 
 		title = strings.TrimSpace(title)
 		activities = append(activities, types.ActivityPreview{Title: title, Points: points})
 	}
 
-	return activities
+	return activities, true
 }
 
 func DbFetchActivity(db *sql.DB, title string) (types.Activity, bool) {
@@ -117,7 +122,8 @@ func DbSelectId(passcode string, pepper []byte, db *sql.DB) (int, bool) {
 	hashedPasscode, err := pbkdf2.Key(crypto.SHA256.New, passcode, pepper, 4096, 64)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return 0, false
 	}
 
 	encodedHashedPasscode := base64.StdEncoding.EncodeToString(hashedPasscode)
@@ -132,11 +138,12 @@ func DbSelectId(passcode string, pepper []byte, db *sql.DB) (int, bool) {
 	return id, true
 }
 
-func DbFetchSubmissions(db *sql.DB, id int, title string) []types.Submission {
+func DbFetchSubmissions(db *sql.DB, id int, title string) ([]types.Submission, bool) {
 	rows, err := db.Query(`SELECT status, image FROM submissions WHERE participant_id = $1 AND activity_title = $2`, id, title)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return []types.Submission{}, false
 	}
 
 	submissions := []types.Submission{}
@@ -146,32 +153,34 @@ func DbFetchSubmissions(db *sql.DB, id int, title string) []types.Submission {
 		var image []byte
 		err := rows.Scan(&status, &image)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return []types.Submission{}, false
 		}
 
 		submissions = append(submissions, types.Submission{Status: status, Image: image})
 	}
 
-	return submissions
+	return submissions, true
 }
 
 func DbPostNewSubmission(db *sql.DB, id int, title string, image []byte) {
 	_, err := db.Query(`INSERT INTO submissions (participant_id, activity_title, image) VALUES($1, $2, $3)`, id, title, image)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 
-func DbFetchParticipantById(db *sql.DB, id int) types.Participant {
+func DbFetchParticipantById(db *sql.DB, id int) (types.Participant, bool) {
 	var name string
 	var score int
 
 	err := db.QueryRow(`SELECT name, score FROM participants WHERE id = $1`, id).Scan(&name, &score)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return types.Participant{}, false
 	}
 
-	return types.Participant{Id: id, Name: name, Score: score}
+	return types.Participant{Id: id, Name: name, Score: score}, true
 }

@@ -16,7 +16,13 @@ func HandleGetActivityPreviews(w http.ResponseWriter, r *http.Request) {
 
 	db := r.Context().Value("db").(*sql.DB)
 
-	activities := common.DbFetchActivityPreviews(db)
+	activities, ok := common.DbFetchActivityPreviews(db)
+
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	serialized, _ := json.Marshal(activities)
 	w.Write(serialized)
 }

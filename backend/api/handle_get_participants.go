@@ -16,7 +16,13 @@ func HandleGetParticipants(w http.ResponseWriter, r *http.Request) {
 
 	db := r.Context().Value("db").(*sql.DB)
 
-	participants := common.DbFetchParticipants(db)
+	participants, ok := common.DbFetchParticipants(db)
+
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	serialized, _ := json.Marshal(participants)
 	w.Write(serialized)
 }

@@ -27,6 +27,12 @@ func HandlePostAuth(w http.ResponseWriter, r *http.Request) {
 
 	hs256Key := r.Context().Value("key").([]byte)
 
-	token := common.GenerateJwtToken(id, hs256Key)
+	token, ok := common.GenerateJwtToken(id, hs256Key)
+
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.Write([]byte(token))
 }

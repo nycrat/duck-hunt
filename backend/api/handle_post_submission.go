@@ -22,7 +22,9 @@ func HandlePostSubmission(w http.ResponseWriter, r *http.Request) {
 	image, err := io.ReadAll(r.Body)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	defer r.Body.Close()
@@ -30,6 +32,8 @@ func HandlePostSubmission(w http.ResponseWriter, r *http.Request) {
 	common.DbPostNewSubmission(db, id.(int), title, image)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }

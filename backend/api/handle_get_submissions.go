@@ -18,7 +18,12 @@ func HandleGetSubmissions(w http.ResponseWriter, r *http.Request) {
 
 	title := r.PathValue("title")
 
-	submissions := common.DbFetchSubmissions(db, id.(int), title)
+	submissions, ok := common.DbFetchSubmissions(db, id.(int), title)
+
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	serialized, _ := json.Marshal(submissions)
 	w.Write(serialized)
