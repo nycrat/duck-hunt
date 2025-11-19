@@ -52,6 +52,7 @@ func main() {
 	r.Post("/session", api.HandlePostSession)
 
 	r.Get("/participants", api.HandleGetParticipants)
+	r.Get("/participants/{id}", api.HandleGetParticipantInfo)
 	r.Get("/activities", api.HandleGetActivityPreviews)
 	r.Get("/activities/{title}", api.HandleGetActivity)
 

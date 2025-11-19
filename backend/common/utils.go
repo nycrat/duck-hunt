@@ -162,3 +162,16 @@ func DbPostNewSubmission(db *sql.DB, id int, title string, image []byte) {
 		log.Fatal(err)
 	}
 }
+
+func DbFetchParticipantById(db *sql.DB, id int) types.Participant {
+	var name string
+	var score int
+
+	err := db.QueryRow(`SELECT name, score FROM participants WHERE id = $1`, id).Scan(&name, &score)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return types.Participant{Id: id, Name: name, Score: score}
+}
