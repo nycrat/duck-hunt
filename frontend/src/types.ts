@@ -3,3 +3,9 @@ export interface Participant {
   name: string
   score: number
 }
+
+export interface Activity {
+  title: string
+  points: number
+  description: string
+}

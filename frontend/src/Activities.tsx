@@ -1,22 +1,7 @@
 import { Title } from "@solidjs/meta"
 import { A } from "@solidjs/router"
 import { createResource, Match, Show, Switch } from "solid-js"
-import { getServerURL } from "./utils"
-
-interface Activity {
-  title: string
-  points: number
-  description: string
-}
-
-const fetchActivities = async (): Promise<Activity[]> => {
-  const response = await fetch(`${getServerURL()}/activities`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-    },
-  })
-  return response.json()
-}
+import { fetchActivities } from "./api"
 
 const Activities = () => {
   const [activities] = createResource(fetchActivities)
