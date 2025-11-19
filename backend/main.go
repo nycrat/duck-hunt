@@ -48,6 +48,7 @@ func main() {
 	r.Use(common.GetDbMiddleware(db))
 
 	r.Post("/auth", api.HandlePostAuth)
+	r.Post("/auth/admin", api.HandlePostAuthAdmin)
 	r.Post("/session", api.HandlePostSession)
 
 	r.Get("/participants", api.HandleGetParticipants)
