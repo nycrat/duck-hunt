@@ -15,8 +15,6 @@ while getopts "bf" opt; do
   esac
 done
 
-source .env
-
 if [[ $FRONTEND != 1 && $BACKEND != 1 ]]; then
   BOTH=1
 fi
@@ -27,7 +25,7 @@ if [[ $FRONTEND = 1 || $BOTH = 1 ]]; then
 fi
 
 if [[ $BACKEND = 1 || $BOTH = 1 ]]; then
-  cd backend; go run cmd/server/server.go $JWT_HS256_KEY $PEPPER $DATABASE_URL_UNPOOLED &
+  cd backend; go run cmd/duck-hunt-server/duck-hunt-server.go &
 fi
 
 wait

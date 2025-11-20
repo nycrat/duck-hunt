@@ -6,17 +6,18 @@ import (
 	"net/http"
 	"os"
 
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/nycrat/duck-hunt/backend/internal/api"
 )
 
 func main() {
-	if len(os.Args) < 4 {
-		log.Fatal("Not enough arguments please specify JWT_HS256_KEY PEPPER DATABASE_URL")
-	}
+	jwtKey := []byte(os.Getenv("DH_JWT_KEY"))
+	pepper := []byte(os.Getenv("DH_PEPPER"))
+	dbConnUrl := os.Getenv("DH_DATABASE_URL")
 
-	jwtKey := []byte(os.Args[1])
-	pepper := []byte(os.Args[2])
-	dbConnUrl := os.Args[3]
+	if jwtKey == nil || pepper == nil || dbConnUrl == "" {
+		log.Fatal("Environment variables not set: DH_JWT_KEY DH_PEPPER DH_DATABASE_URL")
+	}
 
 	// TODO: refactor this away from main function ?
 	db, err := sql.Open("postgres", dbConnUrl)
