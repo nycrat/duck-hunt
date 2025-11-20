@@ -1,10 +1,12 @@
-package common
+package api
 
 import (
 	"context"
 	"database/sql"
 	"net/http"
 	"strings"
+
+	"github.com/nycrat/duck-hunt/backend/internal/repository"
 )
 
 func GetJwtMiddleware(hs256Key []byte) func(http.Handler) http.Handler {
@@ -17,7 +19,7 @@ func GetJwtMiddleware(hs256Key []byte) func(http.Handler) http.Handler {
 				return
 			}
 
-			id, ok := ValidateJwtToken(tokenString, hs256Key)
+			id, ok := repository.ValidateJwtToken(tokenString, hs256Key)
 
 			if !ok {
 				next.ServeHTTP(w, r)

@@ -27,7 +27,7 @@ if [[ $FRONTEND = 1 || $BOTH = 1 ]]; then
 fi
 
 if [[ $BACKEND = 1 || $BOTH = 1 ]]; then
-  cd backend; go run . $JWT_HS256_KEY $PEPPER $DATABASE_URL_UNPOOLED &
+  cd backend; go run cmd/server/server.go $JWT_HS256_KEY $PEPPER $DATABASE_URL_UNPOOLED &
 fi
 
 wait

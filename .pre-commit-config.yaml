@@ -8,4 +8,4 @@ repos:
       - id: format backend
         name: format backend
         language: system
-        entry: bash -c "cd backend && go fmt"
+        entry: bash -c "cd backend && go fmt ./..."
