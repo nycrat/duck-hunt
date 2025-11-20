@@ -8,7 +8,7 @@ const SubmissionReviewPage = () => {
   const navigate = useNavigate()
   const params = useParams()
 
-  const [submissions] = createResource(
+  const [submissions, { refetch: refetchSubmissions }] = createResource(
     { title: params.title, id: params.id },
     fetchPreviousSubmissions,
   )
@@ -35,8 +35,9 @@ const SubmissionReviewPage = () => {
                           "hover:bg-gray-500 cursor-pointer" +
                           (status === submission.status ? " bg-yellow-300" : "")
                         }
-                        onClick={() => {
-                          postReview(submission.id, status)
+                        onClick={async () => {
+                          await postReview(submission.id, status)
+                          refetchSubmissions()
                         }}
                       >
                         {status}
