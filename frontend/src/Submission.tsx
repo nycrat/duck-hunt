@@ -8,10 +8,12 @@ import {
   toTitleCase,
 } from "./utils"
 import { Activity, Submission } from "./types"
+import { fetchWithMiddleware } from "./api"
+import RedirectProvider from "./RedirectProvider"
 
 const fetchActivityInfo = async (title: string): Promise<Activity | null> => {
   const properlyEncodedTitle = title.replaceAll("'", "%27")
-  const response = await fetch(
+  const response = await fetchWithMiddleware(
     `${getServerURL()}/activities/${properlyEncodedTitle}`,
     {
       headers: {
@@ -30,11 +32,14 @@ const fetchActivityInfo = async (title: string): Promise<Activity | null> => {
 const fetchPreviousSubmissions = async (
   title: string,
 ): Promise<Submission[] | null> => {
-  const response = await fetch(`${getServerURL()}/submissions/${title}`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+  const response = await fetchWithMiddleware(
+    `${getServerURL()}/submissions/${title}`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
     },
-  })
+  )
 
   if (response.status !== 200) {
     return null
@@ -45,16 +50,20 @@ const fetchPreviousSubmissions = async (
 
 const postSubmission = async (title: string, image: Blob): Promise<boolean> => {
   console.log(title, image)
-  const response = await fetch(`${getServerURL()}/submissions/${title}`, {
-    method: "POST",
-    body: image,
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+  const response = await fetchWithMiddleware(
+    `${getServerURL()}/submissions/${title}`,
+    {
+      method: "POST",
+      body: image,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
     },
-  })
+  )
 
   return response.status === 200
 }
+
 const MAX_FILE_SIZE_BYTES = 10_000_000
 
 const SubmissionPage = () => {
@@ -71,97 +80,99 @@ const SubmissionPage = () => {
   const [imagePreview] = createResource(image, imageToImageURL)
 
   return (
-    <main class="h-dvh p-10 flex flex-col gap-1">
-      <Title>{decodeURI(params.title)} | DuckHunt</Title>
+    <RedirectProvider>
+      <main class="h-dvh p-10 flex flex-col gap-1">
+        <Title>{decodeURI(params.title)} | DuckHunt</Title>
 
-      <Show when={activity.loading}>loading...</Show>
+        <Show when={activity.loading}>loading...</Show>
 
-      <Switch>
-        <Match when={activity.error}>Error: {activity.error}</Match>
-        <Match when={activity() === null}>
-          <h1>404 activity not found</h1>
-        </Match>
-        <Match when={activity()}>
-          <h1>{decodeURI(params.title)}</h1>
-          <b>{activity()!.points}pts</b>
-          <p>{activity()!.description}</p>
+        <Switch>
+          <Match when={activity.error}>Error: {activity.error}</Match>
+          <Match when={activity() === null}>
+            <h1>404 activity not found</h1>
+          </Match>
+          <Match when={activity()}>
+            <h1>{decodeURI(params.title)}</h1>
+            <b>{activity()!.points}pts</b>
+            <p>{activity()!.description}</p>
 
-          <div class="h-px my-2 bg-black" />
+            <div class="h-px my-2 bg-black" />
 
-          <form
-            class="flex gap-2"
-            onSubmit={async (ev) => {
-              ev.preventDefault()
+            <form
+              class="flex gap-2"
+              onSubmit={async (ev) => {
+                ev.preventDefault()
 
-              const imageFile = image()
-              if (!imageFile) return
+                const imageFile = image()
+                if (!imageFile) return
 
-              const imageBlob = await imageToBlob(imageFile)
-              if (imageBlob) await postSubmission(params.title, imageBlob)
+                const imageBlob = await imageToBlob(imageFile)
+                if (imageBlob) await postSubmission(params.title, imageBlob)
 
-              setImage(null)
-              refetchSubmissions()
-            }}
-          >
-            <label
-              for="image-upload"
-              class="outline px-3 py-1 rounded-full hover:bg-gray-300"
-            >
-              Select photo
-            </label>
-            <input
-              id="image-upload"
-              type="file"
-              accept="image/*"
-              capture="environment"
-              class="hidden"
-              onChange={(ev) => {
-                if (!ev.target.files || !ev.target.files[0]) return
-                const image = ev.target.files[0]
-
-                // TODO: implement reducing file size instead of just denying
-                if (image.size > MAX_FILE_SIZE_BYTES) {
-                  alert("file too large")
-                  return
-                }
-
-                setImage(image)
+                setImage(null)
+                refetchSubmissions()
               }}
-            />
-            <label
-              for="submit"
-              class="outline px-3 py-1 rounded-full hover:bg-gray-300"
             >
-              Submit
-            </label>
-            <input id="submit" type="submit" class="hidden" />
-          </form>
+              <label
+                for="image-upload"
+                class="outline px-3 py-1 rounded-full hover:bg-gray-300"
+              >
+                Select photo
+              </label>
+              <input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                class="hidden"
+                onChange={(ev) => {
+                  if (!ev.target.files || !ev.target.files[0]) return
+                  const image = ev.target.files[0]
 
-          <Show when={imagePreview() && image()}>
-            <img src={imagePreview()} />
-          </Show>
+                  // TODO: implement reducing file size instead of just denying
+                  if (image.size > MAX_FILE_SIZE_BYTES) {
+                    alert("file too large")
+                    return
+                  }
 
-          <div class="h-px my-2 bg-black" />
+                  setImage(image)
+                }}
+              />
+              <label
+                for="submit"
+                class="outline px-3 py-1 rounded-full hover:bg-gray-300"
+              >
+                Submit
+              </label>
+              <input id="submit" type="submit" class="hidden" />
+            </form>
 
-          <h2>Submissions</h2>
+            <Show when={imagePreview() && image()}>
+              <img src={imagePreview()} />
+            </Show>
 
-          <Show when={submissions()}>
-            <ul class="list-inside list-decimal overflow-y-scroll">
-              {submissions()!.map((submission) => (
-                <li>
-                  {toTitleCase(submission.status)}
-                  <img src={`data:image/jpeg;base64,${submission.image}`} />
-                </li>
-              ))}
-            </ul>
-          </Show>
-        </Match>
-      </Switch>
+            <div class="h-px my-2 bg-black" />
 
-      <div class="grow" />
+            <h2>Submissions</h2>
 
-      <A href="/activities">Return to activities</A>
-    </main>
+            <Show when={submissions()}>
+              <ul class="list-inside list-decimal overflow-y-scroll">
+                {submissions()!.map((submission) => (
+                  <li>
+                    {toTitleCase(submission.status)}
+                    <img src={`data:image/jpeg;base64,${submission.image}`} />
+                  </li>
+                ))}
+              </ul>
+            </Show>
+          </Match>
+        </Switch>
+
+        <div class="grow" />
+
+        <A href="/activities">Return to activities</A>
+      </main>
+    </RedirectProvider>
   )
 }
 

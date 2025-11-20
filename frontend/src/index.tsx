@@ -17,6 +17,7 @@ import ActivitiesDashboard from "./admin/Activities"
 import SubmissionReviewPage from "./admin/Review"
 import ParticipantInfo from "./admin/Participant"
 import ActivityInfo from "./admin/Activity"
+import RedirectProvider from "./RedirectProvider"
 
 const root = document.getElementById("root")
 

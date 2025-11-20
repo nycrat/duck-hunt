@@ -1,8 +1,10 @@
 import { createResource, JSX, Match, Switch } from "solid-js"
 import { getServerURL } from "../utils"
+import { fetchWithMiddleware } from "../api"
+import RedirectProvider from "../RedirectProvider"
 
 const authenticate = async (): Promise<boolean> => {
-  const response = await fetch(`${getServerURL()}/auth/admin`, {
+  const response = await fetchWithMiddleware(`${getServerURL()}/auth/admin`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -20,11 +22,13 @@ const AdminRoute = ({ children }: { children: JSX.Element }) => {
   const [hasAdminAccess] = createResource(authenticate)
 
   return (
-    <Switch>
-      <Match when={hasAdminAccess.loading}>loading...</Match>
-      <Match when={!hasAdminAccess()}>You have no access to this page</Match>
-      <Match when={hasAdminAccess()}>{children}</Match>
-    </Switch>
+    <RedirectProvider>
+      <Switch>
+        <Match when={hasAdminAccess.loading}>loading...</Match>
+        <Match when={!hasAdminAccess()}>You have no access to this page</Match>
+        <Match when={hasAdminAccess()}>{children}</Match>
+      </Switch>
+    </RedirectProvider>
   )
 }
 
