@@ -2,7 +2,7 @@ import { Title } from "@solidjs/meta"
 import { useNavigate, useParams } from "@solidjs/router"
 import AdminRoute from "./AdminRoute"
 import { createResource, Match, Switch } from "solid-js"
-import { fetchPreviousSubmissions } from "../api"
+import { fetchPreviousSubmissions, postReview } from "../api"
 
 const SubmissionReviewPage = () => {
   const navigate = useNavigate()
@@ -12,6 +12,8 @@ const SubmissionReviewPage = () => {
     { title: params.title, id: params.id },
     fetchPreviousSubmissions,
   )
+
+  const statuses = ["unreviewed", "rejected", "accepted"]
 
   return (
     <AdminRoute>
@@ -26,7 +28,21 @@ const SubmissionReviewPage = () => {
             <ol class="list-inside list-decimal overflow-y-scroll">
               {submissions()!.map((submission) => (
                 <li>
-                  {submission.status}
+                  <div class="flex gap-2">
+                    {statuses.map((status) => (
+                      <button
+                        class={
+                          "hover:bg-gray-500 cursor-pointer" +
+                          (status === submission.status ? " bg-yellow-300" : "")
+                        }
+                        onClick={() => {
+                          postReview(submission.id, status)
+                        }}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
                   <img
                     src={`data:image/jpeg;base64,${submission.image}`}
                     class="max-h-[40vh]"

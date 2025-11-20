@@ -121,3 +121,21 @@ export const postSubmission = async (
 
   return response.status === 200
 }
+
+export const postReview = async (
+  submissionId: number,
+  status: string,
+): Promise<boolean> => {
+  const response = await fetchWithMiddleware(
+    `${getServerURL()}/review/${submissionId}`,
+    {
+      method: "POST",
+      body: status,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
+    },
+  )
+
+  return response.status === 200
+}

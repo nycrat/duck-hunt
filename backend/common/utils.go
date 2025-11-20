@@ -139,7 +139,7 @@ func DbSelectId(passcode string, pepper []byte, db *sql.DB) (int, bool) {
 }
 
 func DbFetchSubmissions(db *sql.DB, id int, title string) ([]types.Submission, bool) {
-	rows, err := db.Query(`SELECT status, image FROM submissions WHERE participant_id = $1 AND activity_title = $2`, id, title)
+	rows, err := db.Query(`SELECT id, status, image FROM submissions WHERE participant_id = $1 AND activity_title = $2`, id, title)
 
 	if err != nil {
 		log.Println(err)
@@ -149,15 +149,16 @@ func DbFetchSubmissions(db *sql.DB, id int, title string) ([]types.Submission, b
 	submissions := []types.Submission{}
 
 	for rows.Next() {
+		var submissionId int
 		var status string
 		var image []byte
-		err := rows.Scan(&status, &image)
+		err := rows.Scan(&submissionId, &status, &image)
 		if err != nil {
 			log.Println(err)
 			return []types.Submission{}, false
 		}
 
-		submissions = append(submissions, types.Submission{Status: status, Image: image})
+		submissions = append(submissions, types.Submission{Id: submissionId, Status: status, Image: image})
 	}
 
 	return submissions, true
@@ -195,4 +196,12 @@ func DbCountNumberOfSubmissions(db *sql.DB, id int, title string) (int, bool) {
 	}
 
 	return count, true
+}
+
+func DbPostReview(db *sql.DB, submissionId int, status string) {
+	_, err := db.Query(`UPDATE submissions SET status = $1 WHERE id = $2`, status, submissionId)
+
+	if err != nil {
+		log.Println(err)
+	}
 }

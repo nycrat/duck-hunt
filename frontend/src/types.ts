@@ -11,6 +11,7 @@ export interface Activity {
 }
 
 export interface Submission {
+  id: number
   status: "unreviewed" | "rejected" | "accepted"
   image: string
 }
