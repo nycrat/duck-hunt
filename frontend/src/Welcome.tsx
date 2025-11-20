@@ -19,7 +19,6 @@ const fetchSessionId = async (): Promise<number | null> => {
 }
 
 const Welcome = () => {
-  const [eventCode, setEventCode] = createSignal("")
   const [passCode, setPassCode] = createSignal("")
   const navigate = useNavigate()
 
@@ -54,25 +53,10 @@ const Welcome = () => {
 
             localStorage.setItem("jwtToken", await res.text())
 
-            if (eventCode() === "test") {
-              navigate("/leaderboard")
-            } else {
-              alert(`Event (${eventCode()}) not found.`)
-            }
+            navigate("/leaderboard")
           }}
         >
           <h1>DuckHunt</h1>
-          {/* <label for="code">Event code:</label> */}
-          <input
-            type="text"
-            name="code"
-            value={eventCode()}
-            onInput={(e) => {
-              setEventCode(e.target.value)
-            }}
-            placeholder="Enter event code"
-            class="text-center"
-          />
           {/* <label for="id">ID: </label> */}
           <input
             type="password"
@@ -86,7 +70,7 @@ const Welcome = () => {
           />
           <button
             type="submit"
-            disabled={eventCode() === "" || passCode() === ""}
+            disabled={passCode() === ""}
             class="disabled:text-gray-500 disabled:outline-gray-500 rounded outline-black outline-1
                  w-min px-2 not-disabled:hover:bg-gray-300 not-disabled:cursor-pointer"
           >
