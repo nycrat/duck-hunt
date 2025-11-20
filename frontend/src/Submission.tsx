@@ -1,68 +1,13 @@
 import { Title } from "@solidjs/meta"
 import { A, useParams } from "@solidjs/router"
 import { createResource, createSignal, Match, Show, Switch } from "solid-js"
+import { imageToBlob, imageToImageURL, toTitleCase } from "./utils"
 import {
-  getServerURL,
-  imageToBlob,
-  imageToImageURL,
-  toTitleCase,
-} from "./utils"
-import { Activity, Submission } from "./types"
-import { fetchWithMiddleware } from "./api"
+  fetchActivityInfo,
+  fetchPreviousSubmissions,
+  postSubmission,
+} from "./api"
 import RedirectProvider from "./RedirectProvider"
-
-const fetchActivityInfo = async (title: string): Promise<Activity | null> => {
-  const properlyEncodedTitle = title.replaceAll("'", "%27")
-  const response = await fetchWithMiddleware(
-    `${getServerURL()}/activities/${properlyEncodedTitle}`,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    },
-  )
-
-  if (response.status !== 200) {
-    return null
-  }
-
-  return response.json()
-}
-
-const fetchPreviousSubmissions = async (
-  title: string,
-): Promise<Submission[] | null> => {
-  const response = await fetchWithMiddleware(
-    `${getServerURL()}/submissions/${title}`,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    },
-  )
-
-  if (response.status !== 200) {
-    return null
-  }
-
-  return response.json()
-}
-
-const postSubmission = async (title: string, image: Blob): Promise<boolean> => {
-  console.log(title, image)
-  const response = await fetchWithMiddleware(
-    `${getServerURL()}/submissions/${title}`,
-    {
-      method: "POST",
-      body: image,
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    },
-  )
-
-  return response.status === 200
-}
 
 const MAX_FILE_SIZE_BYTES = 10_000_000
 
@@ -71,7 +16,7 @@ const SubmissionPage = () => {
 
   const [activity] = createResource(params.title, fetchActivityInfo)
   const [submissions, { refetch: refetchSubmissions }] = createResource(
-    params.title,
+    { title: params.title },
     fetchPreviousSubmissions,
   )
 

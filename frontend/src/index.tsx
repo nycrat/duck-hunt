@@ -40,7 +40,7 @@ render(
         <Route path="/admin/activities" component={ActivitiesDashboard} />
         <Route path="/admin/activities/:title" component={ActivityInfo} />
         <Route
-          path="/admin/review/:title/:id/:index"
+          path="/admin/review/:title/:id"
           component={SubmissionReviewPage}
         />
         <Route path="*" component={NotFound} />

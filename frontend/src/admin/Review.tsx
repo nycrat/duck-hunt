@@ -1,16 +1,42 @@
 import { Title } from "@solidjs/meta"
-import { useNavigate } from "@solidjs/router"
+import { useNavigate, useParams } from "@solidjs/router"
 import AdminRoute from "./AdminRoute"
+import { createResource, Match, Switch } from "solid-js"
+import { fetchPreviousSubmissions } from "../api"
 
 const SubmissionReviewPage = () => {
   const navigate = useNavigate()
+  const params = useParams()
+
+  const [submissions] = createResource(
+    { title: params.title, id: params.id },
+    fetchPreviousSubmissions,
+  )
 
   return (
     <AdminRoute>
       <main class="h-dvh p-10 flex flex-col gap-1">
-        <Title>Participants | DuckHunt Admin</Title>
-        <h1>Participants Dashboard</h1>
-        admin page: review
+        <Title>{decodeURI(params.title)} Review | DuckHunt Admin</Title>
+        <h1>
+          {decodeURI(params.title)} (Participant {params.id}) - Review
+        </h1>
+
+        <Switch>
+          <Match when={submissions()}>
+            <ol class="list-inside list-decimal overflow-y-scroll">
+              {submissions()!.map((submission) => (
+                <li>
+                  {submission.status}
+                  <img
+                    src={`data:image/jpeg;base64,${submission.image}`}
+                    class="max-h-[40vh]"
+                  />
+                </li>
+              ))}
+            </ol>
+          </Match>
+        </Switch>
+
         <div class="grow" />
         <button
           onClick={() => navigate(-1)}

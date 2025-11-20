@@ -57,6 +57,8 @@ func main() {
 	r.Get("/activities/{title}", api.HandleGetActivity)
 
 	r.Get("/submissions/{title}", api.HandleGetSubmissions)
+	r.Get("/submissions/{title}/{id}", api.HandleGetSubmissions)
+
 	r.Post("/submissions/{title}", api.HandlePostSubmission)
 
 	r.Get("/participants/{id}/submission_counts", api.HandleGetParticipantSubmissionCounts)

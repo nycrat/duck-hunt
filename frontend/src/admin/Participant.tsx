@@ -2,14 +2,14 @@ import { Title } from "@solidjs/meta"
 import { A, useParams } from "@solidjs/router"
 import AdminRoute from "./AdminRoute"
 import { createResource, Match, Switch } from "solid-js"
-import { fetchParticipantInfo, fetchParticipantSubmissions } from "../api"
+import { fetchParticipantInfo, fetchParticipantSubmissionCounts } from "../api"
 
 const ParticipantInfo = () => {
   const params = useParams()
   const id = parseInt(params.id)
 
   const [participant] = createResource(id, fetchParticipantInfo)
-  const [activities] = createResource(id, fetchParticipantSubmissions)
+  const [activities] = createResource(id, fetchParticipantSubmissionCounts)
 
   return (
     <AdminRoute>
@@ -32,7 +32,7 @@ const ParticipantInfo = () => {
               {activities()!.map((activity) => (
                 <li>
                   <A
-                    href={`/admin/review/${activity.title}/${participant()!.id}/0`}
+                    href={`/admin/review/${activity.title}/${participant()!.id}`}
                     class="text-xl"
                   >
                     {activity.title} ({activity.count} submissions)

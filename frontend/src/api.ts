@@ -1,4 +1,4 @@
-import { Activity, ActivitySubmissions, Participant } from "./types"
+import { Activity, ActivitySubmissions, Participant, Submission } from "./types"
 import { getServerURL } from "./utils"
 
 export const fetchWithMiddleware = async (
@@ -47,7 +47,7 @@ export const fetchActivities = async (): Promise<Activity[]> => {
   return response.json()
 }
 
-export const fetchParticipantSubmissions = async (
+export const fetchParticipantSubmissionCounts = async (
   id: number,
 ): Promise<ActivitySubmissions[]> => {
   const response = await fetchWithMiddleware(
@@ -59,4 +59,65 @@ export const fetchParticipantSubmissions = async (
     },
   )
   return response.json()
+}
+
+export const fetchActivityInfo = async (
+  title: string,
+): Promise<Activity | null> => {
+  const properlyEncodedTitle = title.replaceAll("'", "%27")
+  const response = await fetchWithMiddleware(
+    `${getServerURL()}/activities/${properlyEncodedTitle}`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
+    },
+  )
+
+  if (response.status !== 200) {
+    return null
+  }
+
+  return response.json()
+}
+
+export const fetchPreviousSubmissions = async (params: {
+  title: string
+  id?: string
+}): Promise<Submission[] | null> => {
+  const response = await fetchWithMiddleware(
+    params.id
+      ? `${getServerURL()}/submissions/${params.title}/${params.id}`
+      : `${getServerURL()}/submissions/${params.title}`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
+    },
+  )
+
+  if (response.status !== 200) {
+    return null
+  }
+
+  return response.json()
+}
+
+export const postSubmission = async (
+  title: string,
+  image: Blob,
+): Promise<boolean> => {
+  console.log(title, image)
+  const response = await fetchWithMiddleware(
+    `${getServerURL()}/submissions/${title}`,
+    {
+      method: "POST",
+      body: image,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
+    },
+  )
+
+  return response.status === 200
 }
