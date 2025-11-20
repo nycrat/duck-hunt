@@ -22,13 +22,17 @@ const AdminRoute = ({ children }: { children: JSX.Element }) => {
   const [hasAdminAccess] = createResource(authenticate)
 
   return (
-    <RedirectProvider>
-      <Switch>
-        <Match when={hasAdminAccess.loading}>loading...</Match>
-        <Match when={!hasAdminAccess()}>You have no access to this page</Match>
-        <Match when={hasAdminAccess()}>{children}</Match>
-      </Switch>
-    </RedirectProvider>
+    <div class="bg-amber-50">
+      <RedirectProvider>
+        <Switch>
+          <Match when={hasAdminAccess.loading}>loading...</Match>
+          <Match when={!hasAdminAccess()}>
+            You have no access to this page
+          </Match>
+          <Match when={hasAdminAccess()}>{children}</Match>
+        </Switch>
+      </RedirectProvider>
+    </div>
   )
 }
 

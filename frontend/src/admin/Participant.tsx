@@ -1,7 +1,7 @@
 import { Title } from "@solidjs/meta"
 import { A, useParams } from "@solidjs/router"
 import AdminRoute from "./AdminRoute"
-import { createResource, Match, Switch } from "solid-js"
+import { createResource, Match, Show, Switch } from "solid-js"
 import { fetchParticipantInfo, fetchParticipantSubmissionCounts } from "../api"
 
 const ParticipantInfo = () => {
@@ -15,7 +15,12 @@ const ParticipantInfo = () => {
     <AdminRoute>
       <main class="h-dvh p-10 flex flex-col gap-1">
         <Title>Participant | DuckHunt Admin</Title>
-        <h1>Participant Dashboard</h1>
+        <h1>
+          Participant:{" "}
+          <Show when={participant()}>
+            {participant()!.name} ({participant()!.id})
+          </Show>
+        </h1>
 
         <Switch>
           <Match when={participant.loading || activities.loading}>
@@ -24,11 +29,8 @@ const ParticipantInfo = () => {
           <Match when={participant.error}>Error {participant.error}</Match>
           <Match when={activities.error}>Error {activities.error}</Match>
           <Match when={participant() && activities()}>
-            <h2>
-              {participant()!.name} ({participant()!.id})
-            </h2>
             Score: {participant()!.score}
-            <ul>
+            <ul class="overflow-y-scroll">
               {activities()!.map((activity) => (
                 <li>
                   <A

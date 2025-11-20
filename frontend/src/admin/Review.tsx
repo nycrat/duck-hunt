@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "@solidjs/router"
 import AdminRoute from "./AdminRoute"
 import { createResource, Match, Switch } from "solid-js"
 import { fetchPreviousSubmissions, postReview } from "../api"
+import { toTitleCase } from "../utils"
 
 const SubmissionReviewPage = () => {
   const navigate = useNavigate()
@@ -14,6 +15,7 @@ const SubmissionReviewPage = () => {
   )
 
   const statuses = ["unreviewed", "rejected", "accepted"]
+  const statusColors = ["bg-yellow-300/80", "bg-red-300/80", "bg-green-300/80"]
 
   return (
     <AdminRoute>
@@ -23,24 +25,29 @@ const SubmissionReviewPage = () => {
           {decodeURI(params.title)} (Participant {params.id}) - Review
         </h1>
 
+        <div class="h-px my-2 bg-black" />
+
         <Switch>
-          <Match when={submissions()}>
-            <ol class="list-inside list-decimal overflow-y-scroll">
+          <Match when={submissions() && submissions()!.length === 0}>
+            No submissions for this activity
+          </Match>
+          <Match when={submissions() && submissions()!.length > 0}>
+            <ul class="overflow-y-scroll space-y-4">
               {submissions()!.map((submission) => (
-                <li>
+                <li class="space-y-2">
                   <div class="flex gap-2">
-                    {statuses.map((status) => (
+                    {statuses.map((status, i) => (
                       <button
                         class={
-                          "hover:bg-gray-500 cursor-pointer" +
-                          (status === submission.status ? " bg-yellow-300" : "")
+                          "border rounded-full px-2 hover:bg-gray-200/50 cursor-pointer " +
+                          (status === submission.status ? statusColors[i] : "")
                         }
                         onClick={async () => {
                           await postReview(submission.id, status)
                           refetchSubmissions()
                         }}
                       >
-                        {status}
+                        {toTitleCase(status)}
                       </button>
                     ))}
                   </div>
@@ -50,7 +57,7 @@ const SubmissionReviewPage = () => {
                   />
                 </li>
               ))}
-            </ol>
+            </ul>
           </Match>
         </Switch>
 
