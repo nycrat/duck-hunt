@@ -48,3 +48,16 @@ export const toTitleCase = (s: string): string => {
 export const getServerURL = (): string => {
   return import.meta.env.VITE_API_URL ?? "http://localhost:8000"
 }
+
+export const getSessionId = (): number | null => {
+  // NOTE: this doesn't verify the token, but its client side anyways we don't care
+  const token = localStorage.getItem("jwtToken")
+  if (!token) {
+    return null
+  }
+
+  const base64Url = token.split(".")[1]
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
+  const decodedClaims = JSON.parse(atob(base64)) // 'atob' is for browser environments
+  return decodedClaims["sub"]
+}

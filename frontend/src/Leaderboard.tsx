@@ -3,9 +3,11 @@ import { A } from "@solidjs/router"
 import { createResource, Match, Show, Switch } from "solid-js"
 import { fetchParticipants } from "./api"
 import RedirectProvider from "./RedirectProvider"
+import { getSessionId } from "./utils"
 
 const Leaderboard = () => {
   const [participants] = createResource(fetchParticipants)
+  const id = getSessionId()
 
   return (
     <RedirectProvider>
@@ -20,11 +22,18 @@ const Leaderboard = () => {
           <Match when={participants.error}>Error: {participants.error}</Match>
           <Match when={participants()}>
             <div>
+              <em>
+                You currently have{" "}
+                {participants()!.find((p) => p.id === id)?.score} points
+              </em>
               <ol class="list-decimal list-inside">
                 {participants()!
                   .toSorted((a, b) => b.score - a.score)
                   .map((participant) => (
-                    <li>{`${participant.name} (${participant.score}pts)`}</li>
+                    <li>
+                      {`${participant.name} (${participant.score}pts)`}
+                      {participant.id === id && <em> &larr; this is you</em>}
+                    </li>
                   ))}
               </ol>
             </div>
