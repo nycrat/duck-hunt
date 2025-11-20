@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"net/http"
 
-	_ "github.com/lib/pq"
 	"github.com/nycrat/duck-hunt/backend/internal/repository"
 
 	"github.com/go-chi/chi/v5"
