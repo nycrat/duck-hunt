@@ -1,5 +1,5 @@
 import { Title } from "@solidjs/meta"
-import { A } from "@solidjs/router"
+import { A, useNavigate } from "@solidjs/router"
 import { createResource, Match, Show, Switch } from "solid-js"
 import { fetchParticipants } from "./api"
 import RedirectProvider from "./RedirectProvider"
@@ -8,6 +8,7 @@ import { getSessionId } from "./utils"
 const Leaderboard = () => {
   const [participants] = createResource(fetchParticipants)
   const id = getSessionId()
+  const navigate = useNavigate()
 
   return (
     <RedirectProvider>
@@ -41,6 +42,18 @@ const Leaderboard = () => {
         </Switch>
 
         <div class="grow" />
+
+        <button
+          class="text-left underline text-blue-600 cursor-pointer"
+          onClick={() => {
+            if (confirm("Are you sure you want to log out?")) {
+              localStorage.removeItem("jwtToken")
+              navigate("/")
+            }
+          }}
+        >
+          Log out
+        </button>
 
         <A href="/activities">Go to activities</A>
       </main>
