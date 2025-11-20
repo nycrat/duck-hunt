@@ -7,8 +7,25 @@ import (
 	"github.com/nycrat/duck-hunt/backend/internal/types"
 )
 
-func DbFetchSubmissions(db *sql.DB, id int, title string) ([]types.Submission, bool) {
-	rows, err := db.Query(`SELECT id, status, image FROM submissions WHERE participant_id = $1 AND activity_title = $2 ORDER BY id`, id, title)
+type SubmissionRepository struct {
+	db *sql.DB
+}
+
+type SubmissionRepositoryInterface interface {
+	GetAllUserSubmissionsForActivity(db *sql.DB, id int, title string) ([]types.Submission, bool)
+	AddNewSubmission(db *sql.DB, id int, title string, image []byte)
+	GetNumberOfUserSubmissionsForActivity(db *sql.DB, id int, title string) (int, bool)
+	UpdateSubmissionStatus(db *sql.DB, submissionId int, status string)
+}
+
+func NewSubmissionRepository(db *sql.DB) *SubmissionRepository {
+	return &SubmissionRepository{
+		db: db,
+	}
+}
+
+func (r *SubmissionRepository) GetAllUserSubmissionsForActivity(id int, title string) ([]types.Submission, bool) {
+	rows, err := r.db.Query(`SELECT id, status, image FROM submissions WHERE participant_id = $1 AND activity_title = $2 ORDER BY id`, id, title)
 
 	if err != nil {
 		log.Println(err)
@@ -33,17 +50,17 @@ func DbFetchSubmissions(db *sql.DB, id int, title string) ([]types.Submission, b
 	return submissions, true
 }
 
-func DbPostNewSubmission(db *sql.DB, id int, title string, image []byte) {
-	_, err := db.Query(`INSERT INTO submissions (participant_id, activity_title, image) VALUES($1, $2, $3)`, id, title, image)
+func (r *SubmissionRepository) AddNewSubmission(id int, title string, image []byte) {
+	_, err := r.db.Query(`INSERT INTO submissions (participant_id, activity_title, image) VALUES($1, $2, $3)`, id, title, image)
 
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func DbCountNumberOfSubmissions(db *sql.DB, id int, title string) (int, bool) {
+func (r *SubmissionRepository) GetNumberOfUserSubmissionsForActivity(id int, title string) (int, bool) {
 	var count int
-	err := db.QueryRow(`SELECT COUNT(*) FROM submissions WHERE participant_id = $1 AND activity_title = $2`, id, title).Scan(&count)
+	err := r.db.QueryRow(`SELECT COUNT(*) FROM submissions WHERE participant_id = $1 AND activity_title = $2`, id, title).Scan(&count)
 
 	if err != nil {
 		log.Println(err)
@@ -53,8 +70,8 @@ func DbCountNumberOfSubmissions(db *sql.DB, id int, title string) (int, bool) {
 	return count, true
 }
 
-func DbPostReview(db *sql.DB, submissionId int, status string) {
-	_, err := db.Query(`UPDATE submissions SET status = $1 WHERE id = $2`, status, submissionId)
+func (r *SubmissionRepository) UpdateSubmissionStatus(submissionId int, status string) {
+	_, err := r.db.Query(`UPDATE submissions SET status = $1 WHERE id = $2`, status, submissionId)
 
 	if err != nil {
 		log.Println(err)

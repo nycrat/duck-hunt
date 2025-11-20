@@ -1,7 +1,6 @@
 package api
 
 import (
-	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -10,7 +9,19 @@ import (
 	"github.com/nycrat/duck-hunt/backend/internal/repository"
 )
 
-func HandlePostAuth(w http.ResponseWriter, r *http.Request) {
+type AuthHandler struct {
+	r      *repository.AuthRepo
+	jwtKey []byte
+}
+
+func NewAuthHandler(r *repository.AuthRepo, jwtKey []byte) *AuthHandler {
+	return &AuthHandler{
+		r:      r,
+		jwtKey: jwtKey,
+	}
+}
+
+func (h *AuthHandler) HandlePostAuth(w http.ResponseWriter, r *http.Request) {
 	scheme, passcode, found := strings.Cut(r.Header.Get("Authorization"), " ")
 
 	if !found || scheme != "Basic" {
@@ -18,19 +29,14 @@ func HandlePostAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pepper := r.Context().Value("pepper").([]byte)
-	db := r.Context().Value("db").(*sql.DB)
-
-	id, ok := repository.DbSelectId(passcode, pepper, db)
+	id, ok := h.r.GetAuthorizedId(passcode)
 
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	hs256Key := r.Context().Value("key").([]byte)
-
-	token, ok := repository.GenerateJwtToken(id, hs256Key)
+	token, ok := repository.GenerateJwtToken(id, h.jwtKey)
 
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -40,7 +46,7 @@ func HandlePostAuth(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(token))
 }
 
-func HandlePostSession(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) HandlePostSession(w http.ResponseWriter, r *http.Request) {
 	id := r.Context().Value("id")
 	if id == nil {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -60,7 +66,7 @@ func HandlePostSession(w http.ResponseWriter, r *http.Request) {
 }
 
 // Handles /auth/admin, returns OK status if user has session id = 1
-func HandlePostAuthAdmin(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) HandlePostAuthAdmin(w http.ResponseWriter, r *http.Request) {
 	admin := r.Context().Value("admin").(bool)
 	if admin {
 		w.WriteHeader(http.StatusOK)

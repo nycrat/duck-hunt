@@ -8,8 +8,24 @@ import (
 	"log"
 )
 
-func DbSelectId(passcode string, pepper []byte, db *sql.DB) (int, bool) {
-	hashedPasscode, err := pbkdf2.Key(crypto.SHA256.New, passcode, pepper, 4096, 64)
+type AuthRepo struct {
+	db     *sql.DB
+	pepper []byte
+}
+
+type AuthRepoInterface interface {
+	GetAuthorizedId(passcode string) (int, bool)
+}
+
+func NewAuthRepo(db *sql.DB, pepper []byte) *AuthRepo {
+	return &AuthRepo{
+		db:     db,
+		pepper: pepper,
+	}
+}
+
+func (a *AuthRepo) GetAuthorizedId(passcode string) (int, bool) {
+	hashedPasscode, err := pbkdf2.Key(crypto.SHA256.New, passcode, a.pepper, 4096, 64)
 
 	if err != nil {
 		log.Println(err)
@@ -19,7 +35,7 @@ func DbSelectId(passcode string, pepper []byte, db *sql.DB) (int, bool) {
 	encodedHashedPasscode := base64.StdEncoding.EncodeToString(hashedPasscode)
 
 	var id int
-	err = db.QueryRow(`SELECT participant_id FROM passcodes WHERE passcode = $1`, encodedHashedPasscode).Scan(&id)
+	err = a.db.QueryRow(`SELECT participant_id FROM passcodes WHERE passcode = $1`, encodedHashedPasscode).Scan(&id)
 
 	if err != nil {
 		return 0, false

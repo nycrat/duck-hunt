@@ -8,8 +8,23 @@ import (
 	"github.com/nycrat/duck-hunt/backend/internal/types"
 )
 
-func DbFetchActivityPreviews(db *sql.DB) ([]types.ActivityPreview, bool) {
-	rows, err := db.Query("SELECT title, points FROM activities ORDER BY title")
+type ActivityRepository struct {
+	db *sql.DB
+}
+
+type ActivityRepositoryInterface interface {
+	GetAllActivityPreviews(db *sql.DB) ([]types.ActivityPreview, bool)
+	GetActivityByTitle(db *sql.DB, title string) (types.Activity, bool)
+}
+
+func NewActivityRepository(db *sql.DB) *ActivityRepository {
+	return &ActivityRepository{
+		db: db,
+	}
+}
+
+func (r *ActivityRepository) GetAllActivityPreviews() ([]types.ActivityPreview, bool) {
+	rows, err := r.db.Query("SELECT title, points FROM activities ORDER BY title")
 
 	if err != nil {
 		log.Println(err)
@@ -34,10 +49,10 @@ func DbFetchActivityPreviews(db *sql.DB) ([]types.ActivityPreview, bool) {
 	return activities, true
 }
 
-func DbFetchActivity(db *sql.DB, title string) (types.Activity, bool) {
+func (r *ActivityRepository) GetActivityByTitle(title string) (types.Activity, bool) {
 	var points int
 	var description string
-	err := db.QueryRow(`SELECT points, description FROM activities WHERE title = $1`, title).Scan(&points, &description)
+	err := r.db.QueryRow(`SELECT points, description FROM activities WHERE title = $1`, title).Scan(&points, &description)
 
 	if err != nil {
 		return types.Activity{}, false

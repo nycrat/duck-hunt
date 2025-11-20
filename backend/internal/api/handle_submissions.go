@@ -1,7 +1,6 @@
 package api
 
 import (
-	"database/sql"
 	"encoding/json"
 	"io"
 	"log"
@@ -9,9 +8,22 @@ import (
 	"strconv"
 
 	"github.com/nycrat/duck-hunt/backend/internal/repository"
+	"github.com/nycrat/duck-hunt/backend/internal/types"
 )
 
-func HandleGetSubmissions(w http.ResponseWriter, r *http.Request) {
+type SubmissionHandler struct {
+	r *repository.SubmissionRepository
+	a *repository.ActivityRepository
+}
+
+func NewSubmissionHandler(r *repository.SubmissionRepository, a *repository.ActivityRepository) *SubmissionHandler {
+	return &SubmissionHandler{
+		r: r,
+		a: a,
+	}
+}
+
+func (h *SubmissionHandler) HandleGetSubmissions(w http.ResponseWriter, r *http.Request) {
 	var id int
 
 	pathId := r.PathValue("id")
@@ -39,11 +51,9 @@ func HandleGetSubmissions(w http.ResponseWriter, r *http.Request) {
 		id = tokenId.(int)
 	}
 
-	db := r.Context().Value("db").(*sql.DB)
-
 	title := r.PathValue("title")
 
-	submissions, ok := repository.DbFetchSubmissions(db, id, title)
+	submissions, ok := h.r.GetAllUserSubmissionsForActivity(id, title)
 
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -54,14 +64,12 @@ func HandleGetSubmissions(w http.ResponseWriter, r *http.Request) {
 	w.Write(serialized)
 }
 
-func HandlePostSubmission(w http.ResponseWriter, r *http.Request) {
+func (h *SubmissionHandler) HandlePostSubmission(w http.ResponseWriter, r *http.Request) {
 	id := r.Context().Value("id")
 	if id == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-
-	db := r.Context().Value("db").(*sql.DB)
 
 	title := r.PathValue("title")
 
@@ -75,7 +83,7 @@ func HandlePostSubmission(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	repository.DbPostNewSubmission(db, id.(int), title, image)
+	h.r.AddNewSubmission(id.(int), title, image)
 
 	if err != nil {
 		log.Println(err)
@@ -84,7 +92,7 @@ func HandlePostSubmission(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func HandlePostReview(w http.ResponseWriter, r *http.Request) {
+func (h *SubmissionHandler) HandlePostReview(w http.ResponseWriter, r *http.Request) {
 	admin := r.Context().Value("admin").(bool)
 	if !admin {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -106,7 +114,50 @@ func HandlePostReview(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	db := r.Context().Value("db").(*sql.DB)
+	h.r.UpdateSubmissionStatus(int(submissionId), string(status))
+}
 
-	repository.DbPostReview(db, int(submissionId), string(status))
+func (h *SubmissionHandler) HandleGetParticipantSubmissionCounts(w http.ResponseWriter, r *http.Request) {
+	admin := r.Context().Value("admin").(bool)
+
+	if !admin {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
+
+	if err != nil {
+		log.Println(err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	activities, ok := h.a.GetAllActivityPreviews()
+
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	res := []types.ActivitySubmissions{}
+
+	for _, activity := range activities {
+		count, ok := h.r.GetNumberOfUserSubmissionsForActivity(int(id), activity.Title)
+
+		if !ok {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		res = append(res, types.ActivitySubmissions{
+			Title: activity.Title,
+			Count: count,
+		})
+	}
+
+	serialized, _ := json.Marshal(res)
+
+	w.Write(serialized)
 }

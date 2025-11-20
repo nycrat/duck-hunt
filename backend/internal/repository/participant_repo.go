@@ -8,8 +8,23 @@ import (
 	"github.com/nycrat/duck-hunt/backend/internal/types"
 )
 
-func DbFetchParticipants(db *sql.DB) ([]types.Participant, bool) {
-	rows, err := db.Query("SELECT id, name, score FROM participants ORDER BY id")
+type ParticipantRepo struct {
+	db *sql.DB
+}
+
+type ParticipantRepositoryInterface interface {
+	GetAllParticipants() ([]types.Participant, bool)
+	GetAllParticipantById(id int) (types.Participant, bool)
+}
+
+func NewParticipantRepo(db *sql.DB) *ParticipantRepo {
+	return &ParticipantRepo{
+		db: db,
+	}
+}
+
+func (r *ParticipantRepo) GetAllParticipants() ([]types.Participant, bool) {
+	rows, err := r.db.Query("SELECT id, name, score FROM participants ORDER BY id")
 
 	if err != nil {
 		log.Println(err)
@@ -35,11 +50,11 @@ func DbFetchParticipants(db *sql.DB) ([]types.Participant, bool) {
 	return participants, true
 }
 
-func DbFetchParticipantById(db *sql.DB, id int) (types.Participant, bool) {
+func (r *ParticipantRepo) GetParticipantById(id int) (types.Participant, bool) {
 	var name string
 	var score int
 
-	err := db.QueryRow(`SELECT name, score FROM participants WHERE id = $1`, id).Scan(&name, &score)
+	err := r.db.QueryRow(`SELECT name, score FROM participants WHERE id = $1`, id).Scan(&name, &score)
 
 	if err != nil {
 		log.Println(err)

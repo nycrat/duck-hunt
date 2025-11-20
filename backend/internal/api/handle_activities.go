@@ -1,25 +1,32 @@
 package api
 
 import (
-	"database/sql"
 	"encoding/json"
 	"net/http"
 
 	"github.com/nycrat/duck-hunt/backend/internal/repository"
 )
 
-func HandleGetActivity(w http.ResponseWriter, r *http.Request) {
+type ActivityHandler struct {
+	r *repository.ActivityRepository
+}
+
+func NewActivityHandler(r *repository.ActivityRepository) *ActivityHandler {
+	return &ActivityHandler{
+		r: r,
+	}
+}
+
+func (h *ActivityHandler) HandleGetActivity(w http.ResponseWriter, r *http.Request) {
 	id := r.Context().Value("id")
 	if id == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	db := r.Context().Value("db").(*sql.DB)
-
 	title := r.PathValue("title")
 
-	activity, ok := repository.DbFetchActivity(db, title)
+	activity, ok := h.r.GetActivityByTitle(title)
 
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
@@ -30,16 +37,14 @@ func HandleGetActivity(w http.ResponseWriter, r *http.Request) {
 	w.Write(serialized)
 }
 
-func HandleGetActivityPreviews(w http.ResponseWriter, r *http.Request) {
+func (h *ActivityHandler) HandleGetActivityPreviews(w http.ResponseWriter, r *http.Request) {
 	id := r.Context().Value("id")
 	if id == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	db := r.Context().Value("db").(*sql.DB)
-
-	activities, ok := repository.DbFetchActivityPreviews(db)
+	activities, ok := h.r.GetAllActivityPreviews()
 
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)

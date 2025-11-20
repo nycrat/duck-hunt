@@ -2,8 +2,10 @@ package api
 
 import (
 	"database/sql"
-	_ "github.com/lib/pq"
 	"net/http"
+
+	_ "github.com/lib/pq"
+	"github.com/nycrat/duck-hunt/backend/internal/repository"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -22,28 +24,31 @@ func DuckHuntRouter(jwtKey []byte, pepper []byte, db *sql.DB) http.Handler {
 		MaxAge:           300,
 	}))
 
+	participantHandler := NewParticipantHandler(repository.NewParticipantRepo(db))
+	authHandler := NewAuthHandler(repository.NewAuthRepo(db, pepper), jwtKey)
+	activityHandler := NewActivityHandler(repository.NewActivityRepository(db))
+	submissionHandler := NewSubmissionHandler(repository.NewSubmissionRepository(db), repository.NewActivityRepository(db))
+
 	r.Use(GetJwtMiddleware(jwtKey))
-	r.Use(GetPepperMiddleware(pepper))
-	r.Use(GetKeyMiddleware(jwtKey))
-	r.Use(GetDbMiddleware(db))
 
-	r.Post("/auth", HandlePostAuth)
-	r.Post("/auth/admin", HandlePostAuthAdmin)
-	r.Post("/session", HandlePostSession)
+	r.Post("/auth", authHandler.HandlePostAuth)
+	r.Post("/auth/admin", authHandler.HandlePostAuthAdmin)
+	r.Post("/session", authHandler.HandlePostSession)
 
-	r.Get("/participants", HandleGetParticipants)
-	r.Get("/participants/{id}", HandleGetParticipantInfo)
-	r.Get("/activities", HandleGetActivityPreviews)
-	r.Get("/activities/{title}", HandleGetActivity)
+	r.Get("/participants", participantHandler.HandleGetParticipants)
+	r.Get("/participants/{id}", participantHandler.HandleGetParticipantInfo)
 
-	r.Get("/submissions/{title}", HandleGetSubmissions)
-	r.Get("/submissions/{title}/{id}", HandleGetSubmissions)
+	r.Get("/activities", activityHandler.HandleGetActivityPreviews)
+	r.Get("/activities/{title}", activityHandler.HandleGetActivity)
 
-	r.Post("/submissions/{title}", HandlePostSubmission)
+	r.Get("/submissions/{title}", submissionHandler.HandleGetSubmissions)
+	r.Get("/submissions/{title}/{id}", submissionHandler.HandleGetSubmissions)
 
-	r.Get("/participants/{id}/submission_counts", HandleGetParticipantSubmissionCounts)
+	r.Post("/submissions/{title}", submissionHandler.HandlePostSubmission)
 
-	r.Post("/review/{submissionId}", HandlePostReview)
+	r.Get("/participants/{id}/submission_counts", submissionHandler.HandleGetParticipantSubmissionCounts)
+
+	r.Post("/review/{submissionId}", submissionHandler.HandlePostReview)
 
 	return r
 }
