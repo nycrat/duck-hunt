@@ -50,7 +50,7 @@ func GenerateJwtToken(id int, key []byte) (string, bool) {
 }
 
 func DbFetchParticipants(db *sql.DB) ([]types.Participant, bool) {
-	rows, err := db.Query("SELECT id, name, score FROM participants")
+	rows, err := db.Query("SELECT id, name, score FROM participants ORDER BY id")
 
 	if err != nil {
 		log.Println(err)
@@ -77,7 +77,7 @@ func DbFetchParticipants(db *sql.DB) ([]types.Participant, bool) {
 }
 
 func DbFetchActivityPreviews(db *sql.DB) ([]types.ActivityPreview, bool) {
-	rows, err := db.Query("SELECT title, points FROM activities")
+	rows, err := db.Query("SELECT title, points FROM activities ORDER BY title")
 
 	if err != nil {
 		log.Println(err)
@@ -139,7 +139,7 @@ func DbSelectId(passcode string, pepper []byte, db *sql.DB) (int, bool) {
 }
 
 func DbFetchSubmissions(db *sql.DB, id int, title string) ([]types.Submission, bool) {
-	rows, err := db.Query(`SELECT id, status, image FROM submissions WHERE participant_id = $1 AND activity_title = $2`, id, title)
+	rows, err := db.Query(`SELECT id, status, image FROM submissions WHERE participant_id = $1 AND activity_title = $2 ORDER BY id`, id, title)
 
 	if err != nil {
 		log.Println(err)
