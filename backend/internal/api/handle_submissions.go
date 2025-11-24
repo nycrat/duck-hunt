@@ -84,12 +84,6 @@ func (h *SubmissionHandler) HandlePostSubmission(w http.ResponseWriter, r *http.
 	defer r.Body.Close()
 
 	h.r.AddNewSubmission(id.(int), title, image)
-
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 }
 
 func (h *SubmissionHandler) HandlePostReview(w http.ResponseWriter, r *http.Request) {
