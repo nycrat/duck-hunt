@@ -4,6 +4,7 @@ import { createResource, Match, Show, Switch } from "solid-js"
 import { fetchParticipants } from "./api"
 import RedirectProvider from "./RedirectProvider"
 import { getSessionId } from "./utils"
+import Footer from "./components/footer"
 
 const Leaderboard = () => {
   const [participants] = createResource(fetchParticipants)
@@ -43,19 +44,23 @@ const Leaderboard = () => {
 
         <div class="grow" />
 
-        <button
-          class="text-left underline text-blue-600 cursor-pointer"
-          onClick={() => {
-            if (confirm("Are you sure you want to log out?")) {
-              localStorage.removeItem("jwtToken")
-              navigate("/")
-            }
-          }}
-        >
-          Log out
-        </button>
+        <Footer>
+          <>
+            <button
+              class="text-left underline text-blue-600 cursor-pointer"
+              onClick={() => {
+                if (confirm("Are you sure you want to log out?")) {
+                  localStorage.removeItem("jwtToken")
+                  navigate("/")
+                }
+              }}
+            >
+              Log out
+            </button>
 
-        <A href="/activities">Go to activities</A>
+            <A href="/activities">Go to activities</A>
+          </>
+        </Footer>
       </main>
     </RedirectProvider>
   )

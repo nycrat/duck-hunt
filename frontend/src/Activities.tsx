@@ -3,6 +3,7 @@ import { A } from "@solidjs/router"
 import { createResource, Match, Show, Switch } from "solid-js"
 import { fetchActivities } from "./api"
 import RedirectProvider from "./RedirectProvider"
+import Footer from "./components/footer"
 
 const Activities = () => {
   const [activities] = createResource(fetchActivities)
@@ -43,7 +44,9 @@ const Activities = () => {
 
         <div class="grow" />
 
-        <A href="/leaderboard">Go to leaderboard</A>
+        <Footer>
+          <A href="/leaderboard">Go to leaderboard</A>
+        </Footer>
       </main>
     </RedirectProvider>
   )

@@ -4,6 +4,7 @@ import { createEffect, createResource, createSignal } from "solid-js"
 import { getServerURL } from "./utils"
 import { fetchWithMiddleware } from "./api"
 import RedirectProvider from "./RedirectProvider"
+import logo from "./assets/favicon.svg"
 
 const fetchSessionId = async (): Promise<number | null> => {
   const response = await fetchWithMiddleware(`${getServerURL()}/session`, {
@@ -56,6 +57,8 @@ const Welcome = () => {
             navigate("/leaderboard")
           }}
         >
+          <img src={logo} alt="duck hunt logo" width={150} />
+          <div class="h-2" />
           <h1>DuckHunt</h1>
           {/* <label for="id">ID: </label> */}
           <input
@@ -76,6 +79,7 @@ const Welcome = () => {
           >
             Join
           </button>
+          <div class="h-16" />
         </form>
       </main>
     </RedirectProvider>
