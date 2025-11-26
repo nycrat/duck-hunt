@@ -8,6 +8,8 @@
     </p>
 </div>
 
+![duck hunt welcome page](docs/welcome.png)
+
 ![leaderboard, activity, and submission pages](docs/preview.png)
 
 ## Design
