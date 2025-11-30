@@ -7,7 +7,7 @@ import RedirectProvider from "./RedirectProvider"
 import logo from "./assets/favicon.svg"
 
 const fetchSessionId = async (): Promise<number | null> => {
-  const response = await fetchWithMiddleware(`${getServerURL()}/session`, {
+  const response = await fetchWithMiddleware(`${getServerURL()}/auth/session`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -40,12 +40,15 @@ const Welcome = () => {
           onSubmit={async (e) => {
             e.preventDefault()
 
-            const res = await fetchWithMiddleware(`${getServerURL()}/auth`, {
-              method: "POST",
-              headers: {
-                Authorization: `Basic ${passCode()}`,
+            const res = await fetchWithMiddleware(
+              `${getServerURL()}/auth/login`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Basic ${passCode()}`,
+                },
               },
-            })
+            )
 
             if (res.status !== 200) {
               alert("Issue with authorization request")

@@ -127,7 +127,7 @@ export const postReview = async (
   status: string,
 ): Promise<boolean> => {
   const response = await fetchWithMiddleware(
-    `${getServerURL()}/review/${submissionId}`,
+    `${getServerURL()}/submissions/review/${submissionId}`,
     {
       method: "POST",
       body: status,

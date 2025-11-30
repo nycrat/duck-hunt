@@ -30,24 +30,30 @@ func DuckHuntRouter(jwtKey []byte, pepper []byte, db *sql.DB) http.Handler {
 
 	r.Use(GetJwtMiddleware(jwtKey))
 
-	r.Post("/auth", authHandler.HandlePostAuth)
-	r.Post("/auth/admin", authHandler.HandlePostAuthAdmin)
-	r.Post("/session", authHandler.HandlePostSession)
+	r.Route("/participants", func(r chi.Router) {
+		r.Get("/", participantHandler.HandleGetParticipants)
+		r.Get("/{id}", participantHandler.HandleGetParticipantInfo)
+		r.Get("/{id}/submission_counts", submissionHandler.HandleGetParticipantSubmissionCounts)
+	})
 
-	r.Get("/participants", participantHandler.HandleGetParticipants)
-	r.Get("/participants/{id}", participantHandler.HandleGetParticipantInfo)
+	r.Route("/auth", func(r chi.Router) {
+		r.Post("/login", authHandler.HandlePostAuth)
+		r.Post("/admin", authHandler.HandlePostAuthAdmin)
+		r.Post("/session", authHandler.HandlePostSession)
+	})
 
-	r.Get("/activities", activityHandler.HandleGetActivityPreviews)
-	r.Get("/activities/{title}", activityHandler.HandleGetActivity)
+	r.Route("/activities", func(r chi.Router) {
+		r.Get("/", activityHandler.HandleGetActivityPreviews)
+		r.Get("/{title}", activityHandler.HandleGetActivity)
+	})
 
-	r.Get("/submissions/{title}", submissionHandler.HandleGetSubmissions)
-	r.Get("/submissions/{title}/{id}", submissionHandler.HandleGetSubmissions)
+	r.Route("/submissions", func(r chi.Router) {
+		r.Get("/{title}", submissionHandler.HandleGetSubmissions)
+		r.Get("/{title}/{id}", submissionHandler.HandleGetSubmissions)
+		r.Post("/{title}", submissionHandler.HandlePostSubmission)
 
-	r.Post("/submissions/{title}", submissionHandler.HandlePostSubmission)
-
-	r.Get("/participants/{id}/submission_counts", submissionHandler.HandleGetParticipantSubmissionCounts)
-
-	r.Post("/review/{submissionId}", submissionHandler.HandlePostReview)
+		r.Post("/review/{submissionId}", submissionHandler.HandlePostReview)
+	})
 
 	return r
 }
