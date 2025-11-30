@@ -12,14 +12,16 @@ import (
 )
 
 type SubmissionHandler struct {
-	r *repository.SubmissionRepository
+	s *repository.SubmissionRepository
 	a *repository.ActivityRepository
+	p *repository.ParticipantRepository
 }
 
-func NewSubmissionHandler(r *repository.SubmissionRepository, a *repository.ActivityRepository) *SubmissionHandler {
+func NewSubmissionHandler(s *repository.SubmissionRepository, a *repository.ActivityRepository, p *repository.ParticipantRepository) *SubmissionHandler {
 	return &SubmissionHandler{
-		r: r,
+		s: s,
 		a: a,
+		p: p,
 	}
 }
 
@@ -53,7 +55,7 @@ func (h *SubmissionHandler) HandleGetSubmissions(w http.ResponseWriter, r *http.
 
 	title := r.PathValue("title")
 
-	submissions, ok := h.r.GetAllUserSubmissionsForActivity(id, title)
+	submissions, ok := h.s.GetAllUserSubmissionsForActivity(id, title)
 
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -83,7 +85,7 @@ func (h *SubmissionHandler) HandlePostSubmission(w http.ResponseWriter, r *http.
 
 	defer r.Body.Close()
 
-	h.r.AddNewSubmission(id.(int), title, image)
+	h.s.AddNewSubmission(id.(int), title, image)
 }
 
 func (h *SubmissionHandler) HandlePostReview(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +110,16 @@ func (h *SubmissionHandler) HandlePostReview(w http.ResponseWriter, r *http.Requ
 	}
 	defer r.Body.Close()
 
-	h.r.UpdateSubmissionStatus(int(submissionId), string(status))
+	participantId, ok := h.s.GetSubmissionParticipantId(int(submissionId))
+
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	h.s.UpdateSubmissionStatus(int(submissionId), string(status))
+
+	h.p.UpdateParticipantScore(participantId)
 }
 
 func (h *SubmissionHandler) HandleGetParticipantSubmissionCounts(w http.ResponseWriter, r *http.Request) {
@@ -138,7 +149,7 @@ func (h *SubmissionHandler) HandleGetParticipantSubmissionCounts(w http.Response
 	res := []types.ActivitySubmissions{}
 
 	for _, activity := range activities {
-		count, ok := h.r.GetNumberOfUserSubmissionsForActivity(int(id), activity.Title)
+		count, ok := h.s.GetNumberOfUserSubmissionsForActivity(int(id), activity.Title)
 
 		if !ok {
 			w.WriteHeader(http.StatusInternalServerError)

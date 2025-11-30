@@ -77,3 +77,15 @@ func (r *SubmissionRepository) UpdateSubmissionStatus(submissionId int, status s
 		log.Println(err)
 	}
 }
+
+func (r *SubmissionRepository) GetSubmissionParticipantId(submissionId int) (int, bool) {
+	var id int
+	err := r.db.QueryRow(`SELECT participant_id FROM submissions WHERE id = $1`, submissionId).Scan(&id)
+
+	if err != nil {
+		log.Println(err)
+		return 0, false
+	}
+
+	return id, true
+}

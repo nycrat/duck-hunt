@@ -23,10 +23,10 @@ func DuckHuntRouter(jwtKey []byte, pepper []byte, db *sql.DB) http.Handler {
 		MaxAge:           300,
 	}))
 
-	participantHandler := NewParticipantHandler(repository.NewParticipantRepo(db))
+	participantHandler := NewParticipantHandler(repository.NewParticipantRepository(db))
 	authHandler := NewAuthHandler(repository.NewAuthRepo(db, pepper), jwtKey)
 	activityHandler := NewActivityHandler(repository.NewActivityRepository(db))
-	submissionHandler := NewSubmissionHandler(repository.NewSubmissionRepository(db), repository.NewActivityRepository(db))
+	submissionHandler := NewSubmissionHandler(repository.NewSubmissionRepository(db), repository.NewActivityRepository(db), repository.NewParticipantRepository(db))
 
 	r.Use(GetJwtMiddleware(jwtKey))
 

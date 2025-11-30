@@ -10,10 +10,10 @@ import (
 )
 
 type ParticipantHandler struct {
-	r *repository.ParticipantRepo
+	r *repository.ParticipantRepository
 }
 
-func NewParticipantHandler(r *repository.ParticipantRepo) *ParticipantHandler {
+func NewParticipantHandler(r *repository.ParticipantRepository) *ParticipantHandler {
 	return &ParticipantHandler{
 		r: r,
 	}

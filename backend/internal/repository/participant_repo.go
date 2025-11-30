@@ -8,7 +8,7 @@ import (
 	"github.com/nycrat/duck-hunt/backend/internal/types"
 )
 
-type ParticipantRepo struct {
+type ParticipantRepository struct {
 	db *sql.DB
 }
 
@@ -17,13 +17,13 @@ type ParticipantRepositoryInterface interface {
 	GetAllParticipantById(id int) (types.Participant, bool)
 }
 
-func NewParticipantRepo(db *sql.DB) *ParticipantRepo {
-	return &ParticipantRepo{
+func NewParticipantRepository(db *sql.DB) *ParticipantRepository {
+	return &ParticipantRepository{
 		db: db,
 	}
 }
 
-func (r *ParticipantRepo) GetAllParticipants() ([]types.Participant, bool) {
+func (r *ParticipantRepository) GetAllParticipants() ([]types.Participant, bool) {
 	rows, err := r.db.Query("SELECT id, name, score FROM participants ORDER BY id")
 
 	if err != nil {
@@ -50,7 +50,7 @@ func (r *ParticipantRepo) GetAllParticipants() ([]types.Participant, bool) {
 	return participants, true
 }
 
-func (r *ParticipantRepo) GetParticipantById(id int) (types.Participant, bool) {
+func (r *ParticipantRepository) GetParticipantById(id int) (types.Participant, bool) {
 	var name string
 	var score int
 
@@ -62,4 +62,24 @@ func (r *ParticipantRepo) GetParticipantById(id int) (types.Participant, bool) {
 	}
 
 	return types.Participant{Id: id, Name: name, Score: score}, true
+}
+
+func (r *ParticipantRepository) UpdateParticipantScore(id int) {
+	_, err := r.db.Query(`
+	UPDATE participants
+	SET score = (
+		SELECT COALESCE(SUM(points), 0) as total_score
+		FROM activities
+		WHERE title IN (
+			SELECT activity_title
+			FROM submissions
+			WHERE participant_id = $1 AND status = 'accepted'
+		)
+	)
+	WHERE participants.id = $1
+	`, id)
+
+	if err != nil {
+		log.Println(err)
+	}
 }
