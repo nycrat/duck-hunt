@@ -15,6 +15,7 @@ type ParticipantRepository struct {
 type ParticipantRepositoryInterface interface {
 	GetAllParticipants() ([]types.Participant, bool)
 	GetAllParticipantById(id int) (types.Participant, bool)
+	AddNewParticipant(name string)
 }
 
 func NewParticipantRepository(db *sql.DB) *ParticipantRepository {
@@ -78,6 +79,14 @@ func (r *ParticipantRepository) UpdateParticipantScore(id int) {
 	)
 	WHERE participants.id = $1
 	`, id)
+
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func (r *ParticipantRepository) AddNewParticipant(name string) {
+	_, err := r.db.Query(`INSERT INTO participants (name) VALUES ($1)`, name)
 
 	if err != nil {
 		log.Println(err)
