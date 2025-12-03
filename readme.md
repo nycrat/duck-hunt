@@ -11,9 +11,3 @@
 ![duck hunt welcome page](docs/welcome.png)
 
 ![leaderboard, activity, and submission pages](docs/preview.png)
-
-## Design
-
-![user flow diagram and wireframe](docs/design.svg)
-
-![admin flow diagram and wireframe](docs/admin-design.svg)
