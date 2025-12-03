@@ -60,7 +60,11 @@ func (a *AuthRepo) AddNewLoginInfo(id int, passcode string) {
 		return
 	}
 
-	_, err := a.db.Query(`INSERT INTO passcodes (participant_id, passcode) VALUES ($1, $2)`, id, encodedHashedPasscode)
+	_, err := a.db.Query(`
+	INSERT INTO passcodes (participant_id, passcode) VALUES ($1, $2)
+	ON CONFLICT (participant_id) DO UPDATE
+	SET passcode = $2
+	`, id, encodedHashedPasscode)
 
 	if err != nil {
 		log.Println(err)
