@@ -4,7 +4,7 @@
     <p>
         Digital scavenger hunts that bring people together
         <br />
-        <a href="https://github.com/nycrat/duck-hunt">Visit site</a>
+        <a href="https://duckhunt.nycrat.dev/">Visit site</a>
     </p>
 </div>
 
