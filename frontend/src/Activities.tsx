@@ -1,12 +1,15 @@
 import { Title } from "@solidjs/meta"
 import { A } from "@solidjs/router"
-import { createResource, Match, Show, Switch } from "solid-js"
+import { createResource, createSignal, Match, Show, Switch } from "solid-js"
 import { fetchActivities } from "./api"
 import RedirectProvider from "./RedirectProvider"
 import Footer from "./components/footer"
 
 const Activities = () => {
   const [activities] = createResource(fetchActivities)
+  const [sorting, setSorting] = createSignal("Name")
+  const collator = new Intl.Collator()
+  const sortingOptions = ["Name", "Points"]
 
   return (
     <RedirectProvider>
@@ -15,10 +18,16 @@ const Activities = () => {
 
         <h1>Activities</h1>
 
-        {/* TODO implement sorting options */}
-        <div>
-          Sort by: <button>Name</button>{" "}
-          <button class="underline">Points</button> <button>Todo</button>
+        <div class="flex gap-1">
+          Sort by:
+          {sortingOptions.map((option) => (
+            <button
+              onClick={() => setSorting(option)}
+              class={`${sorting() === option ? "underline" : ""} hover:underline`}
+            >
+              {option}
+            </button>
+          ))}
         </div>
 
         <Show when={activities.loading}>loading...</Show>
@@ -29,7 +38,11 @@ const Activities = () => {
             <div>
               <ol>
                 {activities()!
-                  .toSorted((a, b) => b.points - a.points)
+                  .toSorted(
+                    sorting() === "Name"
+                      ? (a, b) => collator.compare(a.title, b.title)
+                      : (a, b) => b.points - a.points,
+                  )
                   .map((activity) => (
                     <li>
                       <A href={`/activities/${activity.title}`}>
