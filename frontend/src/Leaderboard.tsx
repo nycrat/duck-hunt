@@ -1,6 +1,6 @@
 import { Title } from "@solidjs/meta"
 import { A, useNavigate } from "@solidjs/router"
-import { createResource, Match, Show, Switch } from "solid-js"
+import { createMemo, createResource, For, Match, Show, Switch } from "solid-js"
 import { fetchParticipants } from "./api"
 import RedirectProvider from "./RedirectProvider"
 import { getSessionId } from "./utils"
@@ -10,6 +10,23 @@ const Leaderboard = () => {
   const [participants] = createResource(fetchParticipants)
   const id = getSessionId()
   const navigate = useNavigate()
+
+  const sortedParticipants = createMemo(() => {
+    let prevScore = -1
+    let prevRanking = 0
+    return (participants() ?? [])
+      .toSorted((a, b) => a.score - b.score)
+      .map((participant, index) => {
+        if (participant.score !== prevScore) {
+          prevRanking = index + 1
+          prevScore = participant.score
+        }
+
+        return { ...participant, ranking: prevRanking }
+      })
+  })
+
+  const you = createMemo(() => sortedParticipants().find((p) => p.id === id))
 
   return (
     <RedirectProvider>
@@ -24,20 +41,22 @@ const Leaderboard = () => {
           <Match when={participants.error}>Error: {participants.error}</Match>
           <Match when={participants()}>
             <div>
-              <em>
-                You currently have{" "}
-                {participants()!.find((p) => p.id === id)?.score} points
-              </em>
-              <ol class="list-decimal list-inside">
-                {participants()!
-                  .toSorted((a, b) => b.score - a.score)
-                  .map((participant) => (
-                    <li>
-                      {`${participant.name} (${participant.score}pts)`}
-                      {participant.id === id && <em> &larr; this is you</em>}
-                    </li>
-                  ))}
-              </ol>
+              <em>You currently have {you()?.score} points</em>
+              <For each={sortedParticipants().slice(0, 20)}>
+                {(participant) => (
+                  <div>
+                    {participant.ranking}. {participant.name} (
+                    {participant.score}pts){" "}
+                    {participant.id === id && <em> &larr; this is you</em>}
+                  </div>
+                )}
+              </For>
+              {sortedParticipants().findIndex((p) => p.id === id) >= 20 && (
+                <div>
+                  {you()?.ranking}. {you()?.name} ({you()?.score}pts){" "}
+                  <em> &larr; this is you</em>
+                </div>
+              )}
             </div>
           </Match>
         </Switch>
