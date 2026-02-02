@@ -40,24 +40,24 @@ const Leaderboard = () => {
         <Switch>
           <Match when={participants.error}>Error: {participants.error}</Match>
           <Match when={participants()}>
-            <div>
+            <ul class="overflow-y-auto">
               <em>You currently have {you()?.score} points</em>
               <For each={sortedParticipants().slice(0, 20)}>
                 {(participant) => (
-                  <div>
+                  <li>
                     {participant.ranking}. {participant.name} (
                     {participant.score}pts){" "}
                     {participant.id === id && <em> &larr; this is you</em>}
-                  </div>
+                  </li>
                 )}
               </For>
               {sortedParticipants().findIndex((p) => p.id === id) >= 20 && (
-                <div>
+                <li>
                   {you()?.ranking}. {you()?.name} ({you()?.score}pts){" "}
                   <em> &larr; this is you</em>
-                </div>
+                </li>
               )}
-            </div>
+            </ul>
           </Match>
         </Switch>
 
