@@ -35,23 +35,21 @@ const Activities = () => {
         <Switch>
           <Match when={activities.error}>Error: {activities.error}</Match>
           <Match when={activities()}>
-            <div>
-              <ol>
-                {activities()!
-                  .toSorted(
-                    sorting() === "Name"
-                      ? (a, b) => collator.compare(a.title, b.title)
-                      : (a, b) => b.points - a.points,
-                  )
-                  .map((activity) => (
-                    <li>
-                      <A href={`/activities/${activity.title}`}>
-                        {`${activity.title} (${activity.points}pts)`}
-                      </A>
-                    </li>
-                  ))}
-              </ol>
-            </div>
+            <ol class="overflow-y-auto">
+              {activities()!
+                .toSorted(
+                  sorting() === "Name"
+                    ? (a, b) => collator.compare(a.title, b.title)
+                    : (a, b) => b.points - a.points,
+                )
+                .map((activity) => (
+                  <li>
+                    <A href={`/activities/${activity.title}`}>
+                      {`${activity.title} (${activity.points}pts)`}
+                    </A>
+                  </li>
+                ))}
+            </ol>
           </Match>
         </Switch>
 
