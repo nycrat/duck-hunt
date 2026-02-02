@@ -15,7 +15,7 @@ const Leaderboard = () => {
     let prevScore = -1
     let prevRanking = 0
     return (participants() ?? [])
-      .toSorted((a, b) => a.score - b.score)
+      .toSorted((a, b) => b.score - a.score)
       .map((participant, index) => {
         if (participant.score !== prevScore) {
           prevRanking = index + 1
