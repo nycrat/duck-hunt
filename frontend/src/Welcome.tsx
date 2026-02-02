@@ -63,7 +63,6 @@ const Welcome = () => {
           <img src={logo} alt="duck hunt logo" width={150} />
           <div class="h-2" />
           <h1>DuckHunt</h1>
-          {/* <label for="id">ID: </label> */}
           <input
             type="password"
             name="id"
@@ -71,7 +70,7 @@ const Welcome = () => {
             onInput={(e) => {
               setPassCode(e.target.value)
             }}
-            placeholder="Enter your ID"
+            placeholder="Enter your passcode"
             class="text-center"
           />
           <button
