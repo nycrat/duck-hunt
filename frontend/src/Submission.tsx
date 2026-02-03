@@ -82,7 +82,7 @@ const SubmissionPage = () => {
                 for="photo-input"
                 class="outline px-3 py-1 rounded-full hover:bg-gray-300"
               >
-                Take photo
+                Capture
               </label>
               <input
                 id="photo-input"
@@ -96,7 +96,7 @@ const SubmissionPage = () => {
                 for="image-upload"
                 class="outline px-3 py-1 rounded-full hover:bg-gray-300"
               >
-                Upload photo
+                Upload
               </label>
               <input
                 id="image-upload"
