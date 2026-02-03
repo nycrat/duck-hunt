@@ -1,6 +1,13 @@
 import { Title } from "@solidjs/meta"
 import { A, useParams } from "@solidjs/router"
-import { createResource, createSignal, Match, Show, Switch } from "solid-js"
+import {
+  createResource,
+  createSignal,
+  JSX,
+  Match,
+  Show,
+  Switch,
+} from "solid-js"
 import { imageToBlob, imageToImageURL, toTitleCase } from "./utils"
 import {
   fetchActivityInfo,
@@ -23,6 +30,19 @@ const SubmissionPage = () => {
   const [image, setImage] = createSignal<File | null>(null)
 
   const [imagePreview] = createResource(image, imageToImageURL)
+
+  const handleUploadImage: JSX.EventHandler<HTMLInputElement, Event> = (ev) => {
+    if (!ev.currentTarget.files || !ev.currentTarget.files[0]) return
+    const image = ev.currentTarget.files[0]
+
+    // TODO: implement reducing file size instead of just denying
+    if (image.size > MAX_FILE_SIZE_BYTES) {
+      alert("file too large")
+      return
+    }
+
+    setImage(image)
+  }
 
   return (
     <RedirectProvider>
@@ -59,29 +79,31 @@ const SubmissionPage = () => {
               }}
             >
               <label
+                for="photo-input"
+                class="outline px-3 py-1 rounded-full hover:bg-gray-300"
+              >
+                Take photo
+              </label>
+              <input
+                id="photo-input"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                class="hidden"
+                onChange={handleUploadImage}
+              />
+              <label
                 for="image-upload"
                 class="outline px-3 py-1 rounded-full hover:bg-gray-300"
               >
-                Select photo
+                Upload photo
               </label>
               <input
                 id="image-upload"
                 type="file"
                 accept="image/*"
-                capture="environment"
                 class="hidden"
-                onChange={(ev) => {
-                  if (!ev.target.files || !ev.target.files[0]) return
-                  const image = ev.target.files[0]
-
-                  // TODO: implement reducing file size instead of just denying
-                  if (image.size > MAX_FILE_SIZE_BYTES) {
-                    alert("file too large")
-                    return
-                  }
-
-                  setImage(image)
-                }}
+                onChange={handleUploadImage}
               />
               <label
                 for="submit"
