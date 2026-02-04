@@ -37,14 +37,14 @@ func (h *ActivityHandler) HandleGetActivity(w http.ResponseWriter, r *http.Reque
 	w.Write(serialized)
 }
 
-func (h *ActivityHandler) HandleGetActivityPreviews(w http.ResponseWriter, r *http.Request) {
+func (h *ActivityHandler) HandleGetActivityList(w http.ResponseWriter, r *http.Request) {
 	id := r.Context().Value("id")
 	if id == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	activities, ok := h.r.GetAllActivityPreviews()
+	activities, ok := h.r.GetActivityList()
 
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)

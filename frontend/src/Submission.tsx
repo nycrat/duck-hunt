@@ -10,8 +10,8 @@ import {
 } from "solid-js"
 import { imageToBlob, imageToImageURL, toTitleCase } from "./utils"
 import {
-  fetchActivityInfo,
-  fetchPreviousSubmissions,
+  fetchActivity,
+  fetchActivitySubmissionList,
   postSubmission,
 } from "./api"
 import RedirectProvider from "./RedirectProvider"
@@ -21,10 +21,10 @@ const MAX_FILE_SIZE_BYTES = 10_000_000
 const SubmissionPage = () => {
   const params = useParams()
 
-  const [activity] = createResource(params.title, fetchActivityInfo)
+  const [activity] = createResource(params.title, fetchActivity)
   const [submissions, { refetch: refetchSubmissions }] = createResource(
     { title: params.title },
-    fetchPreviousSubmissions,
+    fetchActivitySubmissionList,
   )
 
   const [image, setImage] = createSignal<File | null>(null)

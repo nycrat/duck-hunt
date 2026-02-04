@@ -2,10 +2,10 @@ import { Title } from "@solidjs/meta"
 import { A } from "@solidjs/router"
 import AdminRoute from "./AdminRoute"
 import { createResource, Match, Switch } from "solid-js"
-import { fetchParticipants } from "../api"
+import { fetchParticipantList } from "../api"
 
 const ParticipantsDashboard = () => {
-  const [participants] = createResource(fetchParticipants)
+  const [participants] = createResource(fetchParticipantList)
 
   return (
     <AdminRoute>

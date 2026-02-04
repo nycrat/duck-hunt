@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/nycrat/duck-hunt/backend/internal/repository"
-	"github.com/nycrat/duck-hunt/backend/internal/types"
 )
 
 type SubmissionHandler struct {
@@ -25,37 +24,16 @@ func NewSubmissionHandler(s *repository.SubmissionRepository, a *repository.Acti
 	}
 }
 
-func (h *SubmissionHandler) HandleGetSubmissions(w http.ResponseWriter, r *http.Request) {
-	var id int
-
-	pathId := r.PathValue("id")
-	admin := r.Context().Value("admin").(bool)
-
-	// Admin fetching a participant's submissions
-	if pathId != "" {
-		if !admin {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		parsedId, err := strconv.ParseInt(pathId, 10, 32)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		id = int(parsedId)
-	} else {
-		tokenId := r.Context().Value("id")
-		if tokenId == nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		id = tokenId.(int)
+func (h *SubmissionHandler) HandleGetSubmissionList(w http.ResponseWriter, r *http.Request) {
+	id := r.Context().Value("id")
+	if id == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
 
 	title := r.PathValue("title")
 
-	submissions, ok := h.s.GetAllUserSubmissionsForActivity(id, title)
+	submissions, ok := h.s.GetAllUserSubmissionsForActivity(id.(int), title)
 
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -66,7 +44,7 @@ func (h *SubmissionHandler) HandleGetSubmissions(w http.ResponseWriter, r *http.
 	w.Write(serialized)
 }
 
-func (h *SubmissionHandler) HandleGetUnreviewedSubmissions(w http.ResponseWriter, r *http.Request) {
+func (h *SubmissionHandler) HandleGetUnreviewedSubmissionList(w http.ResponseWriter, r *http.Request) {
 	admin := r.Context().Value("admin").(bool)
 	if !admin {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -106,7 +84,7 @@ func (h *SubmissionHandler) HandlePostSubmission(w http.ResponseWriter, r *http.
 	h.s.AddNewSubmission(id.(int), title, image)
 }
 
-func (h *SubmissionHandler) HandlePostReview(w http.ResponseWriter, r *http.Request) {
+func (h *SubmissionHandler) HandleUpdateSubmission(w http.ResponseWriter, r *http.Request) {
 	admin := r.Context().Value("admin").(bool)
 	if !admin {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -138,49 +116,4 @@ func (h *SubmissionHandler) HandlePostReview(w http.ResponseWriter, r *http.Requ
 	h.s.UpdateSubmissionStatus(int(submissionId), string(status))
 
 	h.p.UpdateParticipantScore(participantId)
-}
-
-func (h *SubmissionHandler) HandleGetParticipantSubmissionCounts(w http.ResponseWriter, r *http.Request) {
-	admin := r.Context().Value("admin").(bool)
-
-	if !admin {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
-
-	if err != nil {
-		log.Println(err)
-
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	activities, ok := h.a.GetAllActivityPreviews()
-
-	if !ok {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	res := []types.ActivitySubmissions{}
-
-	for _, activity := range activities {
-		count, ok := h.s.GetNumberOfUserSubmissionsForActivity(int(id), activity.Title)
-
-		if !ok {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		res = append(res, types.ActivitySubmissions{
-			Title: activity.Title,
-			Count: count,
-		})
-	}
-
-	serialized, _ := json.Marshal(res)
-
-	w.Write(serialized)
 }

@@ -1,12 +1,12 @@
 import { Title } from "@solidjs/meta"
 import { A } from "@solidjs/router"
 import { createResource, createSignal, Match, Show, Switch } from "solid-js"
-import { fetchActivities } from "./api"
+import { fetchActivityList } from "./api"
 import RedirectProvider from "./RedirectProvider"
 import Footer from "./components/footer"
 
 const Activities = () => {
-  const [activities] = createResource(fetchActivities)
+  const [activities] = createResource(fetchActivityList)
   const [sorting, setSorting] = createSignal("Name")
   const collator = new Intl.Collator()
   const sortingOptions = ["Name", "Points"]

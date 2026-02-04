@@ -1,13 +1,13 @@
 import { Title } from "@solidjs/meta"
 import { A, useNavigate } from "@solidjs/router"
 import { createMemo, createResource, For, Match, Show, Switch } from "solid-js"
-import { fetchParticipants } from "./api"
+import { fetchParticipantList } from "./api"
 import RedirectProvider from "./RedirectProvider"
 import { getSessionId } from "./utils"
 import Footer from "./components/footer"
 
 const Leaderboard = () => {
-  const [participants] = createResource(fetchParticipants)
+  const [participants] = createResource(fetchParticipantList)
   const id = getSessionId()
   const navigate = useNavigate()
 

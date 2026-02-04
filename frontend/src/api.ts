@@ -20,24 +20,22 @@ export const fetchWithMiddleware = async (
   return res
 }
 
-export const fetchParticipants = async (): Promise<Participant[]> => {
+export const fetchParticipantList = async (): Promise<Participant[]> => {
   const response = await fetchWithMiddleware(`/participants`)
   return response.json()
 }
 
-export const fetchParticipantInfo = async (
-  id: number,
-): Promise<Participant> => {
+export const fetchParticipant = async (id: number): Promise<Participant> => {
   const response = await fetchWithMiddleware(`/participants/${id}`)
   return response.json()
 }
 
-export const fetchActivities = async (): Promise<Activity[]> => {
+export const fetchActivityList = async (): Promise<Activity[]> => {
   const response = await fetchWithMiddleware(`/activities`)
   return response.json()
 }
 
-export const fetchActivityInfo = async (
+export const fetchActivity = async (
   title: string,
 ): Promise<Activity | null> => {
   const properlyEncodedTitle = title.replaceAll("'", "%27")
@@ -52,14 +50,11 @@ export const fetchActivityInfo = async (
   return response.json()
 }
 
-export const fetchPreviousSubmissions = async (params: {
+export const fetchActivitySubmissionList = async (params: {
   title: string
-  id?: string
 }): Promise<Submission[] | null> => {
   const response = await fetchWithMiddleware(
-    params.id
-      ? `/submissions/${params.title}/${params.id}`
-      : `/submissions/${params.title}`,
+    `/activities/${params.title}/submissions`,
   )
 
   if (response.status !== 200) {
@@ -74,10 +69,13 @@ export const postSubmission = async (
   image: Blob,
 ): Promise<boolean> => {
   console.log(title, image)
-  const response = await fetchWithMiddleware(`/submissions/${title}`, {
-    method: "POST",
-    body: image,
-  })
+  const response = await fetchWithMiddleware(
+    `/activities/${title}/submissions/`,
+    {
+      method: "POST",
+      body: image,
+    },
+  )
 
   return response.status === 200
 }
@@ -87,9 +85,9 @@ export const postReview = async (
   status: string,
 ): Promise<boolean> => {
   const response = await fetchWithMiddleware(
-    `/submissions/review/${submissionId}`,
+    `/admin/submissions/${submissionId}`,
     {
-      method: "POST",
+      method: "PATCH",
       body: status,
     },
   )
@@ -100,9 +98,7 @@ export const postReview = async (
 export const fetchUnreviewedSubmissions = async (): Promise<
   Submission[] | null
 > => {
-  const response = await fetchWithMiddleware(
-    `/submissions/list/unreviewed/todo`,
-  )
+  const response = await fetchWithMiddleware(`/admin/submissions`)
 
   if (response.status !== 200) {
     return null

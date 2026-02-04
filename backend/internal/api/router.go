@@ -30,31 +30,32 @@ func DuckHuntRouter(jwtKey []byte, pepper []byte, db *sql.DB) http.Handler {
 
 	r.Use(GetJwtMiddleware(jwtKey))
 
-	r.Route("/participants", func(r chi.Router) {
-		r.Get("/", participantHandler.HandleGetParticipants)
-		r.Get("/{id}", participantHandler.HandleGetParticipantInfo)
-		r.Get("/{id}/submission_counts", submissionHandler.HandleGetParticipantSubmissionCounts)
-	})
-
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/login", authHandler.HandlePostAuth)
-		r.Post("/admin", authHandler.HandlePostAuthAdmin)
 		r.Post("/session", authHandler.HandlePostSession)
+		r.Post("/admin", authHandler.HandlePostAuthAdmin)
+	})
+
+	r.Route("/participants", func(r chi.Router) {
+		r.Get("/", participantHandler.HandleGetParticipantList)
+		r.Get("/{id}", participantHandler.HandleGetParticipantInfo)
 	})
 
 	r.Route("/activities", func(r chi.Router) {
-		r.Get("/", activityHandler.HandleGetActivityPreviews)
+		r.Get("/", activityHandler.HandleGetActivityList)
 		r.Get("/{title}", activityHandler.HandleGetActivity)
+
+		r.Route("/{title}/submissions", func(r chi.Router) {
+			r.Get("/", submissionHandler.HandleGetSubmissionList)
+			r.Post("/", submissionHandler.HandlePostSubmission)
+		})
 	})
 
-	r.Route("/submissions", func(r chi.Router) {
-		r.Get("/list/unreviewed/todo", submissionHandler.HandleGetUnreviewedSubmissions)
-
-		r.Get("/{title}", submissionHandler.HandleGetSubmissions)
-		r.Get("/{title}/{id}", submissionHandler.HandleGetSubmissions)
-		r.Post("/{title}", submissionHandler.HandlePostSubmission)
-
-		r.Post("/review/{submissionId}", submissionHandler.HandlePostReview)
+	r.Route("/admin", func(r chi.Router) {
+		r.Route("/submissions", func(r chi.Router) {
+			r.Get("/", submissionHandler.HandleGetUnreviewedSubmissionList)
+			r.Patch("/{id}", submissionHandler.HandleUpdateSubmission)
+		})
 	})
 
 	return r

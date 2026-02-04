@@ -13,7 +13,7 @@ type ActivityRepository struct {
 }
 
 type ActivityRepositoryInterface interface {
-	GetAllActivityPreviews(db *sql.DB) ([]types.ActivityPreview, bool)
+	GetActivityList(db *sql.DB) ([]types.Activity, bool)
 	GetActivityByTitle(db *sql.DB, title string) (types.Activity, bool)
 }
 
@@ -23,27 +23,28 @@ func NewActivityRepository(db *sql.DB) *ActivityRepository {
 	}
 }
 
-func (r *ActivityRepository) GetAllActivityPreviews() ([]types.ActivityPreview, bool) {
-	rows, err := r.db.Query("SELECT title, points FROM activities ORDER BY title")
+func (r *ActivityRepository) GetActivityList() ([]types.Activity, bool) {
+	rows, err := r.db.Query("SELECT title, points, description FROM activities ORDER BY title")
 
 	if err != nil {
 		log.Println(err)
-		return []types.ActivityPreview{}, false
+		return []types.Activity{}, false
 	}
 
-	activities := []types.ActivityPreview{}
+	activities := []types.Activity{}
 
 	for rows.Next() {
 		var title string
 		var points int
-		err := rows.Scan(&title, &points)
+		var description string
+		err := rows.Scan(&title, &points, &description)
 		if err != nil {
 			log.Println(err)
-			return []types.ActivityPreview{}, false
+			return []types.Activity{}, false
 		}
 
 		title = strings.TrimSpace(title)
-		activities = append(activities, types.ActivityPreview{Title: title, Points: points})
+		activities = append(activities, types.Activity{Title: title, Points: points, Description: description})
 	}
 
 	return activities, true

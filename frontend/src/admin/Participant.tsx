@@ -2,13 +2,13 @@ import { Title } from "@solidjs/meta"
 import { A, useParams } from "@solidjs/router"
 import AdminRoute from "./AdminRoute"
 import { createResource, Match, Show, Switch } from "solid-js"
-import { fetchParticipantInfo } from "../api"
+import { fetchParticipant } from "../api"
 
 const ParticipantInfo = () => {
   const params = useParams()
   const id = parseInt(params.id)
 
-  const [participant] = createResource(id, fetchParticipantInfo)
+  const [participant] = createResource(id, fetchParticipant)
 
   return (
     <AdminRoute>

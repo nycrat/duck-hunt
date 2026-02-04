@@ -2,7 +2,7 @@ import { Title } from "@solidjs/meta"
 import { useNavigate, useParams } from "@solidjs/router"
 import AdminRoute from "./AdminRoute"
 import { createResource, Match, Switch } from "solid-js"
-import { fetchPreviousSubmissions } from "../api"
+import { fetchActivitySubmissionList } from "../api"
 import ReviewList from "./ReviewList"
 
 const SubmissionReviewPage = () => {
@@ -11,7 +11,7 @@ const SubmissionReviewPage = () => {
 
   const [submissions, { refetch: refetchSubmissions }] = createResource(
     { title: params.title, id: params.id },
-    fetchPreviousSubmissions,
+    fetchActivitySubmissionList,
   )
 
   return (

@@ -19,7 +19,7 @@ func NewParticipantHandler(r *repository.ParticipantRepository) *ParticipantHand
 	}
 }
 
-func (h *ParticipantHandler) HandleGetParticipants(w http.ResponseWriter, r *http.Request) {
+func (h *ParticipantHandler) HandleGetParticipantList(w http.ResponseWriter, r *http.Request) {
 	id := r.Context().Value("id")
 	if id == nil {
 		w.WriteHeader(http.StatusUnauthorized)

@@ -15,8 +15,3 @@ export interface Submission {
   status: "unreviewed" | "rejected" | "accepted"
   image: string
 }
-
-export interface ActivitySubmissions {
-  title: string
-  count: number
-}
