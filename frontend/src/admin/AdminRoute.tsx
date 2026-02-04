@@ -1,14 +1,10 @@
 import { createResource, JSX, Match, Switch } from "solid-js"
-import { getServerURL } from "../utils"
 import { fetchWithMiddleware } from "../api"
 import RedirectProvider from "../RedirectProvider"
 
 const authenticate = async (): Promise<boolean> => {
-  const response = await fetchWithMiddleware(`${getServerURL()}/auth/admin`, {
+  const response = await fetchWithMiddleware(`/auth/admin`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-    },
   })
   return response.status === 200
 }

@@ -1,13 +1,16 @@
 import { Activity, Participant, Submission } from "./types"
 import { getServerURL } from "./utils"
 
-// TODO: refactor to reduce code repeating
-
 export const fetchWithMiddleware = async (
-  input: RequestInfo | URL,
+  path: string,
   init?: RequestInit,
 ): Promise<Response> => {
-  const res = await fetch(input, init)
+  const res = await fetch(`${getServerURL()}${path}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+    },
+    ...init,
+  })
 
   if (res.status === 401) {
     console.log("refresh session token")
@@ -18,34 +21,19 @@ export const fetchWithMiddleware = async (
 }
 
 export const fetchParticipants = async (): Promise<Participant[]> => {
-  const response = await fetchWithMiddleware(`${getServerURL()}/participants`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-    },
-  })
+  const response = await fetchWithMiddleware(`/participants`)
   return response.json()
 }
 
 export const fetchParticipantInfo = async (
   id: number,
 ): Promise<Participant> => {
-  const response = await fetchWithMiddleware(
-    `${getServerURL()}/participants/${id}`,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    },
-  )
+  const response = await fetchWithMiddleware(`/participants/${id}`)
   return response.json()
 }
 
 export const fetchActivities = async (): Promise<Activity[]> => {
-  const response = await fetchWithMiddleware(`${getServerURL()}/activities`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-    },
-  })
+  const response = await fetchWithMiddleware(`/activities`)
   return response.json()
 }
 
@@ -54,12 +42,7 @@ export const fetchActivityInfo = async (
 ): Promise<Activity | null> => {
   const properlyEncodedTitle = title.replaceAll("'", "%27")
   const response = await fetchWithMiddleware(
-    `${getServerURL()}/activities/${properlyEncodedTitle}`,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    },
+    `/activities/${properlyEncodedTitle}`,
   )
 
   if (response.status !== 200) {
@@ -75,13 +58,8 @@ export const fetchPreviousSubmissions = async (params: {
 }): Promise<Submission[] | null> => {
   const response = await fetchWithMiddleware(
     params.id
-      ? `${getServerURL()}/submissions/${params.title}/${params.id}`
-      : `${getServerURL()}/submissions/${params.title}`,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    },
+      ? `/submissions/${params.title}/${params.id}`
+      : `/submissions/${params.title}`,
   )
 
   if (response.status !== 200) {
@@ -96,16 +74,10 @@ export const postSubmission = async (
   image: Blob,
 ): Promise<boolean> => {
   console.log(title, image)
-  const response = await fetchWithMiddleware(
-    `${getServerURL()}/submissions/${title}`,
-    {
-      method: "POST",
-      body: image,
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    },
-  )
+  const response = await fetchWithMiddleware(`/submissions/${title}`, {
+    method: "POST",
+    body: image,
+  })
 
   return response.status === 200
 }
@@ -115,13 +87,10 @@ export const postReview = async (
   status: string,
 ): Promise<boolean> => {
   const response = await fetchWithMiddleware(
-    `${getServerURL()}/submissions/review/${submissionId}`,
+    `/submissions/review/${submissionId}`,
     {
       method: "POST",
       body: status,
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
     },
   )
 
@@ -132,12 +101,7 @@ export const fetchUnreviewedSubmissions = async (): Promise<
   Submission[] | null
 > => {
   const response = await fetchWithMiddleware(
-    `${getServerURL()}/submissions/list/unreviewed/todo`,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    },
+    `/submissions/list/unreviewed/todo`,
   )
 
   if (response.status !== 200) {
