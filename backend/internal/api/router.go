@@ -48,6 +48,8 @@ func DuckHuntRouter(jwtKey []byte, pepper []byte, db *sql.DB) http.Handler {
 	})
 
 	r.Route("/submissions", func(r chi.Router) {
+		r.Get("/list/unreviewed/todo", submissionHandler.HandleGetUnreviewedSubmissions)
+
 		r.Get("/{title}", submissionHandler.HandleGetSubmissions)
 		r.Get("/{title}/{id}", submissionHandler.HandleGetSubmissions)
 		r.Post("/{title}", submissionHandler.HandlePostSubmission)

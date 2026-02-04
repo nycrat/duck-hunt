@@ -16,6 +16,7 @@ type SubmissionRepositoryInterface interface {
 	AddNewSubmission(db *sql.DB, id int, title string, image []byte)
 	GetNumberOfUserSubmissionsForActivity(db *sql.DB, id int, title string) (int, bool)
 	UpdateSubmissionStatus(db *sql.DB, submissionId int, status string)
+	GetUnreviewedSubmissions(db *sql.DB)
 }
 
 func NewSubmissionRepository(db *sql.DB) *SubmissionRepository {
@@ -88,4 +89,33 @@ func (r *SubmissionRepository) GetSubmissionParticipantId(submissionId int) (int
 	}
 
 	return id, true
+}
+
+func (r *SubmissionRepository) GetUnreviewedSubmissions() ([]types.Submission, bool) {
+	rows, err := r.db.Query(`SELECT id, status, image FROM submissions
+	WHERE status = 'unreviewed'
+	ORDER BY activity_title, id
+	LIMIT 10`)
+
+	if err != nil {
+		log.Println(err)
+		return []types.Submission{}, false
+	}
+
+	submissions := []types.Submission{}
+
+	for rows.Next() {
+		var submissionId int
+		var status string
+		var image []byte
+		err := rows.Scan(&submissionId, &status, &image)
+		if err != nil {
+			log.Println(err)
+			return []types.Submission{}, false
+		}
+
+		submissions = append(submissions, types.Submission{Id: submissionId, Status: status, Image: image})
+	}
+
+	return submissions, true
 }

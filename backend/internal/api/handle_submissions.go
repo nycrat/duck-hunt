@@ -66,6 +66,24 @@ func (h *SubmissionHandler) HandleGetSubmissions(w http.ResponseWriter, r *http.
 	w.Write(serialized)
 }
 
+func (h *SubmissionHandler) HandleGetUnreviewedSubmissions(w http.ResponseWriter, r *http.Request) {
+	admin := r.Context().Value("admin").(bool)
+	if !admin {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	submissions, ok := h.s.GetUnreviewedSubmissions()
+
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	serialized, _ := json.Marshal(submissions)
+	w.Write(serialized)
+}
+
 func (h *SubmissionHandler) HandlePostSubmission(w http.ResponseWriter, r *http.Request) {
 	id := r.Context().Value("id")
 	if id == nil {

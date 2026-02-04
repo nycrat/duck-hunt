@@ -2,14 +2,13 @@ import { Title } from "@solidjs/meta"
 import { A, useParams } from "@solidjs/router"
 import AdminRoute from "./AdminRoute"
 import { createResource, Match, Show, Switch } from "solid-js"
-import { fetchParticipantInfo, fetchParticipantSubmissionCounts } from "../api"
+import { fetchParticipantInfo } from "../api"
 
 const ParticipantInfo = () => {
   const params = useParams()
   const id = parseInt(params.id)
 
   const [participant] = createResource(id, fetchParticipantInfo)
-  const [activities] = createResource(id, fetchParticipantSubmissionCounts)
 
   return (
     <AdminRoute>
@@ -23,26 +22,9 @@ const ParticipantInfo = () => {
         </h1>
 
         <Switch>
-          <Match when={participant.loading || activities.loading}>
-            loading...
-          </Match>
+          <Match when={participant.loading}>loading...</Match>
           <Match when={participant.error}>Error {participant.error}</Match>
-          <Match when={activities.error}>Error {activities.error}</Match>
-          <Match when={participant() && activities()}>
-            Score: {participant()!.score}
-            <ul class="overflow-y-scroll">
-              {activities()!.map((activity) => (
-                <li>
-                  <A
-                    href={`/admin/review/${activity.title}/${participant()!.id}`}
-                    class="text-xl"
-                  >
-                    {activity.title} ({activity.count} submissions)
-                  </A>
-                </li>
-              ))}
-            </ul>
-          </Match>
+          <Match when={participant()}>Score: {participant()!.score}</Match>
         </Switch>
 
         <div class="grow" />

@@ -31,7 +31,7 @@ const ParticipantsDashboard = () => {
           </Match>
         </Switch>
         <div class="grow" />
-        <A href="/admin/activities">Go to activities</A>
+        <A href="/admin/review">Go to review</A>
       </main>
     </AdminRoute>
   )

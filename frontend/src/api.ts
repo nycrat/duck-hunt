@@ -1,5 +1,7 @@
-import { Activity, ActivitySubmissions, Participant, Submission } from "./types"
+import { Activity, Participant, Submission } from "./types"
 import { getServerURL } from "./utils"
+
+// TODO: refactor to reduce code repeating
 
 export const fetchWithMiddleware = async (
   input: RequestInfo | URL,
@@ -44,20 +46,6 @@ export const fetchActivities = async (): Promise<Activity[]> => {
       Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
     },
   })
-  return response.json()
-}
-
-export const fetchParticipantSubmissionCounts = async (
-  id: number,
-): Promise<ActivitySubmissions[]> => {
-  const response = await fetchWithMiddleware(
-    `${getServerURL()}/participants/${id}/submission_counts`,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    },
-  )
   return response.json()
 }
 
@@ -138,4 +126,23 @@ export const postReview = async (
   )
 
   return response.status === 200
+}
+
+export const fetchUnreviewedSubmissions = async (): Promise<
+  Submission[] | null
+> => {
+  const response = await fetchWithMiddleware(
+    `${getServerURL()}/submissions/list/unreviewed/todo`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
+    },
+  )
+
+  if (response.status !== 200) {
+    return null
+  }
+
+  return response.json()
 }
