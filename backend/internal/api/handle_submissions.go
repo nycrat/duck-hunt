@@ -5,10 +5,15 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/nycrat/duck-hunt/backend/internal/repository"
 )
+
+type SubmissionPatch struct {
+	Id            int    `json:"id"`
+	Status        string `json:"status"`
+	ParticipantId int    `json:"participant_id"`
+}
 
 type SubmissionHandler struct {
 	s *repository.SubmissionRepository
@@ -91,14 +96,7 @@ func (h *SubmissionHandler) HandleUpdateSubmission(w http.ResponseWriter, r *htt
 		return
 	}
 
-	submissionId, err := strconv.ParseInt(r.PathValue("submissionId"), 10, 32)
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	status, err := io.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -106,14 +104,15 @@ func (h *SubmissionHandler) HandleUpdateSubmission(w http.ResponseWriter, r *htt
 	}
 	defer r.Body.Close()
 
-	participantId, ok := h.s.GetSubmissionParticipantId(int(submissionId))
+	var patch SubmissionPatch
 
-	if !ok {
+	err = json.Unmarshal(body, &patch)
+	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	h.s.UpdateSubmissionStatus(int(submissionId), string(status))
-
-	h.p.UpdateParticipantScore(participantId)
+	h.s.UpdateSubmissionStatus(patch.Id, patch.Status)
+	h.p.UpdateParticipantScore(patch.ParticipantId)
 }

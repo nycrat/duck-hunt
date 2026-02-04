@@ -17,7 +17,7 @@ func DuckHuntRouter(jwtKey []byte, pepper []byte, db *sql.DB) http.Handler {
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{"http://*", "https://*"},
 
-		AllowedMethods:   []string{"GET", "POST"},
+		AllowedMethods:   []string{"GET", "POST", "PATCH"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: false,
 		MaxAge:           300,
@@ -54,7 +54,7 @@ func DuckHuntRouter(jwtKey []byte, pepper []byte, db *sql.DB) http.Handler {
 	r.Route("/admin", func(r chi.Router) {
 		r.Route("/submissions", func(r chi.Router) {
 			r.Get("/", submissionHandler.HandleGetUnreviewedSubmissionList)
-			r.Patch("/{id}", submissionHandler.HandleUpdateSubmission)
+			r.Patch("/", submissionHandler.HandleUpdateSubmission)
 		})
 	})
 

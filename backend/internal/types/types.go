@@ -16,7 +16,9 @@ type Activity struct {
 //
 // Image: []byte
 type Submission struct {
-	Id     int    `json:"id"`
-	Status string `json:"status"`
-	Image  []byte `json:"image"`
+	Id            int    `json:"id"`
+	Status        string `json:"status"`
+	Image         []byte `json:"image"`
+	ParticipantId int    `json:"participant_id"`
+	ActivityTitle string `json:"activity_title"`
 }

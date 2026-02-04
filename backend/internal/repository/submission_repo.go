@@ -92,7 +92,7 @@ func (r *SubmissionRepository) GetSubmissionParticipantId(submissionId int) (int
 }
 
 func (r *SubmissionRepository) GetUnreviewedSubmissions() ([]types.Submission, bool) {
-	rows, err := r.db.Query(`SELECT id, status, image FROM submissions
+	rows, err := r.db.Query(`SELECT id, status, image, participant_id, activity_title FROM submissions
 	WHERE status = 'unreviewed'
 	ORDER BY activity_title, id
 	LIMIT 10`)
@@ -108,13 +108,21 @@ func (r *SubmissionRepository) GetUnreviewedSubmissions() ([]types.Submission, b
 		var submissionId int
 		var status string
 		var image []byte
-		err := rows.Scan(&submissionId, &status, &image)
+		var participantId int
+		var activityTitle string
+		err := rows.Scan(&submissionId, &status, &image, &participantId, &activityTitle)
 		if err != nil {
 			log.Println(err)
 			return []types.Submission{}, false
 		}
 
-		submissions = append(submissions, types.Submission{Id: submissionId, Status: status, Image: image})
+		submissions = append(submissions, types.Submission{
+			Id:            submissionId,
+			Status:        status,
+			Image:         image,
+			ParticipantId: participantId,
+			ActivityTitle: activityTitle,
+		})
 	}
 
 	return submissions, true

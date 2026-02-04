@@ -81,16 +81,16 @@ export const postSubmission = async (
 }
 
 export const postReview = async (
-  submissionId: number,
-  status: string,
+  updatedSubmission: Submission,
 ): Promise<boolean> => {
-  const response = await fetchWithMiddleware(
-    `/admin/submissions/${submissionId}`,
-    {
-      method: "PATCH",
-      body: status,
-    },
-  )
+  const response = await fetchWithMiddleware(`/admin/submissions`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      id: updatedSubmission.id,
+      status: updatedSubmission.status,
+      participant_id: updatedSubmission.participant_id,
+    }),
+  })
 
   return response.status === 200
 }

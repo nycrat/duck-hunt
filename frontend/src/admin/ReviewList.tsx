@@ -1,5 +1,5 @@
 import { postReview } from "../api"
-import { Submission } from "../types"
+import { Submission, SubmissionStatus } from "../types"
 import { toTitleCase } from "../utils"
 
 const ReviewList = ({
@@ -9,13 +9,17 @@ const ReviewList = ({
   submissions: Submission[]
   onReview: () => void
 }) => {
-  const statuses = ["unreviewed", "rejected", "accepted"]
+  const statuses: SubmissionStatus[] = ["unreviewed", "rejected", "accepted"]
   const statusColors = ["bg-yellow-300/80", "bg-red-300/80", "bg-green-300/80"]
 
   return (
     <ul class="overflow-y-scroll space-y-4">
       {submissions.map((submission) => (
         <li class="space-y-2">
+          <strong>
+            {submission.activity_title} - participant{" "}
+            {submission.participant_id}
+          </strong>
           <div class="flex gap-2">
             {statuses.map((status, i) => (
               <button
@@ -24,7 +28,7 @@ const ReviewList = ({
                   (status === submission.status ? statusColors[i] : "")
                 }
                 onClick={async () => {
-                  await postReview(submission.id, status)
+                  await postReview({ ...submission, status: status })
                   onReview()
                 }}
               >
