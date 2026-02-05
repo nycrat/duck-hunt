@@ -1,4 +1,4 @@
-import { Accessor } from "solid-js"
+import { Accessor, For } from "solid-js"
 import { postReview } from "../api"
 import { Submission, SubmissionStatus } from "../types"
 import { toTitleCase } from "../utils"
@@ -14,34 +14,38 @@ const ReviewList = (props: Props) => {
 
   return (
     <ul class="overflow-y-scroll space-y-4">
-      {props.submissions()!.map((submission) => (
-        <li class="space-y-2">
-          <strong>
-            {submission.activity_title} - participant{" "}
-            {submission.participant_id}
-          </strong>
-          <div class="flex gap-2">
-            {statuses.map((status, i) => (
-              <button
-                class={
-                  "border rounded-full px-2 hover:bg-gray-200/50 cursor-pointer " +
-                  (status === submission.status ? statusColors[i] : "")
-                }
-                onClick={async () => {
-                  await postReview({ ...submission, status: status })
-                  props.onReview(submission)
-                }}
-              >
-                {toTitleCase(status)}
-              </button>
-            ))}
-          </div>
-          <img
-            src={`data:image/jpeg;base64,${submission.image}`}
-            class="max-h-[40vh]"
-          />
-        </li>
-      ))}
+      <For each={props.submissions()!}>
+        {(submission) => (
+          <li class="space-y-2">
+            <strong>
+              {submission.activity_title} - participant{" "}
+              {submission.participant_id}
+            </strong>
+            <div class="flex gap-2">
+              <For each={statuses}>
+                {(status, i) => (
+                  <button
+                    class={
+                      "border rounded-full px-2 hover:bg-gray-200/50 cursor-pointer " +
+                      (status === submission.status ? statusColors[i()] : "")
+                    }
+                    onClick={async () => {
+                      await postReview({ ...submission, status: status })
+                      props.onReview(submission)
+                    }}
+                  >
+                    {toTitleCase(status)}
+                  </button>
+                )}
+              </For>
+            </div>
+            <img
+              src={`data:image/jpeg;base64,${submission.image}`}
+              class="max-h-[40vh]"
+            />
+          </li>
+        )}
+      </For>
     </ul>
   )
 }

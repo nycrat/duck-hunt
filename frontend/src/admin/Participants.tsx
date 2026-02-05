@@ -1,7 +1,7 @@
 import { Title } from "@solidjs/meta"
 import { A } from "@solidjs/router"
 import AdminRoute from "./AdminRoute"
-import { createResource, Match, Switch } from "solid-js"
+import { For, createResource, Match, Switch } from "solid-js"
 import { fetchParticipantList } from "../api"
 
 const ParticipantsDashboard = () => {
@@ -17,16 +17,18 @@ const ParticipantsDashboard = () => {
           <Match when={participants.error}>Error {participants.error}</Match>
           <Match when={participants()}>
             <ul class="overflow-y-scroll">
-              {participants()!.map((participant) => (
-                <li>
-                  <A
-                    href={`/admin/participants/${participant.id}`}
-                    class="text-xl"
-                  >
-                    {participant.name} ({participant.id})
-                  </A>
-                </li>
-              ))}
+              <For each={participants()!}>
+                {(participant) => (
+                  <li>
+                    <A
+                      href={`/admin/participants/${participant.id}`}
+                      class="text-xl"
+                    >
+                      {participant.name} ({participant.id})
+                    </A>
+                  </li>
+                )}
+              </For>
             </ul>
           </Match>
         </Switch>

@@ -1,6 +1,7 @@
 import { Title } from "@solidjs/meta"
 import { A, useParams } from "@solidjs/router"
 import {
+  For,
   createResource,
   createSignal,
   JSX,
@@ -124,12 +125,14 @@ const SubmissionPage = () => {
 
             <Show when={submissions()}>
               <ul class="list-inside list-decimal overflow-y-scroll">
-                {submissions()!.map((submission) => (
-                  <li>
-                    {toTitleCase(submission.status)}
-                    <img src={`data:image/jpeg;base64,${submission.image}`} />
-                  </li>
-                ))}
+                <For each={submissions()!}>
+                  {(submission) => (
+                    <li>
+                      {toTitleCase(submission.status)}
+                      <img src={`data:image/jpeg;base64,${submission.image}`} />
+                    </li>
+                  )}
+                </For>
               </ul>
             </Show>
           </Match>
