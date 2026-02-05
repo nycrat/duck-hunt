@@ -24,7 +24,7 @@ const SubmissionPage = () => {
 
   const [activity] = createResource(params.title, fetchActivity)
   const [submissions, { refetch: refetchSubmissions }] = createResource(
-    { title: params.title },
+    params.title,
     fetchActivitySubmissionList,
   )
 

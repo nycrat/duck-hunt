@@ -50,12 +50,10 @@ export const fetchActivity = async (
   return response.json()
 }
 
-export const fetchActivitySubmissionList = async (params: {
-  title: string
-}): Promise<Submission[]> => {
-  const response = await fetchWithMiddleware(
-    `/activities/${params.title}/submissions`,
-  )
+export const fetchActivitySubmissionList = async (
+  title: string,
+): Promise<Submission[]> => {
+  const response = await fetchWithMiddleware(`/activities/${title}/submissions`)
 
   if (response.status !== 200) {
     return []
@@ -68,7 +66,6 @@ export const postSubmission = async (
   title: string,
   image: Blob,
 ): Promise<boolean> => {
-  console.log(title, image)
   const response = await fetchWithMiddleware(
     `/activities/${title}/submissions/`,
     {
