@@ -6,7 +6,9 @@ import { fetchUnreviewedSubmissions } from "../api"
 import ReviewList from "./ReviewList"
 
 const ReviewFeed = () => {
-  const [submissions, { refetch }] = createResource(fetchUnreviewedSubmissions)
+  const [submissions, { refetch, mutate }] = createResource(
+    fetchUnreviewedSubmissions,
+  )
 
   return (
     <AdminRoute>
@@ -17,7 +19,16 @@ const ReviewFeed = () => {
           <Match when={submissions.loading}>loading...</Match>
           <Match when={submissions.error}>Error</Match>
           <Match when={submissions()}>
-            <ReviewList submissions={submissions()!} onReview={refetch} />
+            <ReviewList
+              submissions={submissions}
+              onReview={(submission) => {
+                if (submissions()!.length === 0) {
+                  refetch()
+                } else {
+                  mutate(submissions()!.filter((s) => s.id !== submission.id))
+                }
+              }}
+            />
           </Match>
         </Switch>
         <div class="grow" />

@@ -52,13 +52,13 @@ export const fetchActivity = async (
 
 export const fetchActivitySubmissionList = async (params: {
   title: string
-}): Promise<Submission[] | null> => {
+}): Promise<Submission[]> => {
   const response = await fetchWithMiddleware(
     `/activities/${params.title}/submissions`,
   )
 
   if (response.status !== 200) {
-    return null
+    return []
   }
 
   return response.json()
@@ -95,13 +95,11 @@ export const postReview = async (
   return response.status === 200
 }
 
-export const fetchUnreviewedSubmissions = async (): Promise<
-  Submission[] | null
-> => {
+export const fetchUnreviewedSubmissions = async (): Promise<Submission[]> => {
   const response = await fetchWithMiddleware(`/admin/submissions`)
 
   if (response.status !== 200) {
-    return null
+    return []
   }
 
   return response.json()

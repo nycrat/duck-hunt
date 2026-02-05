@@ -1,20 +1,20 @@
+import { Accessor } from "solid-js"
 import { postReview } from "../api"
 import { Submission, SubmissionStatus } from "../types"
 import { toTitleCase } from "../utils"
 
-const ReviewList = ({
-  submissions,
-  onReview,
-}: {
-  submissions: Submission[]
-  onReview: () => void
-}) => {
+type Props = {
+  submissions: Accessor<Submission[] | undefined>
+  onReview: (submission: Submission) => void
+}
+
+const ReviewList = (props: Props) => {
   const statuses: SubmissionStatus[] = ["unreviewed", "rejected", "accepted"]
   const statusColors = ["bg-yellow-300/80", "bg-red-300/80", "bg-green-300/80"]
 
   return (
     <ul class="overflow-y-scroll space-y-4">
-      {submissions.map((submission) => (
+      {props.submissions()!.map((submission) => (
         <li class="space-y-2">
           <strong>
             {submission.activity_title} - participant{" "}
@@ -29,7 +29,7 @@ const ReviewList = ({
                 }
                 onClick={async () => {
                   await postReview({ ...submission, status: status })
-                  onReview()
+                  props.onReview(submission)
                 }}
               >
                 {toTitleCase(status)}
