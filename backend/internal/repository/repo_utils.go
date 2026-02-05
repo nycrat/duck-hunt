@@ -25,7 +25,7 @@ func ValidateJwtToken(jwtString string, key []byte) (int, bool) {
 }
 
 func GenerateJwtToken(id int, key []byte) (string, bool) {
-	duration := 48 * 60 * 60 * 1000 * 1000 * 1000 // 2 days in nanoseconds
+	duration := 7 * 24 * 60 * 60 * 1000 * 1000 * 1000 // 7 days in nanoseconds
 	expirationTime := time.Now().Add(time.Duration(duration)).Unix()
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
