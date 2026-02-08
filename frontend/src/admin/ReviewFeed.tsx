@@ -22,7 +22,7 @@ const ReviewFeed = () => {
             <ReviewList
               submissions={submissions}
               onReview={(submission) => {
-                if (submissions()!.length === 0) {
+                if (submissions()!.length === 1) {
                   refetch()
                 } else {
                   mutate(submissions()!.filter((s) => s.id !== submission.id))
